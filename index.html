@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Team Insight v4.0</title>
+<title>Team Insight v4.1</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
@@ -440,7 +440,7 @@ const BILA_TYPES = ['Reguläres BILA','Probezeitgespräch','Jahresgespräch','En
 const PRIOS = ['Hoch','Mittel','Niedrig'];
 const CONF_LEVELS = ['Standard','Persönlich','Vertraulich','HR-relevant'];
 
-const APP_VERSION = '4.0';
+const APP_VERSION = '4.1';
 
 const DRIVE_FILENAME = 'teaminsight-data.json';
 
@@ -454,7 +454,7 @@ let gDriveFileId = null;
 function isSignedIn(){ return !!gAccessToken; }
 
 function initGoogleAuth(){
-  const cid = state.settings && state.settings.clientId;
+  const cid = (state.settings && state.settings.clientId) || '498089633917-rgqiqfol4p86dl588q0h3ck8gdii29iu.apps.googleusercontent.com';
   if(!cid) return false;
   const saved = localStorage.getItem('ti_gtoken');
   const savedExp = parseInt(localStorage.getItem('ti_gtoken_exp')||'0');
@@ -467,7 +467,7 @@ function initGoogleAuth(){
 }
 
 function googleSignIn(){
-  const cid = (state.settings && state.settings.clientId) || '';
+  const cid = (state.settings && state.settings.clientId) || '498089633917-rgqiqfol4p86dl588q0h3ck8gdii29iu.apps.googleusercontent.com';
   if(!cid){ alert('Zuerst die Google Client-ID in den Einstellungen eintragen!'); showView('settings'); return; }
   const client = google.accounts.oauth2.initTokenClient({
     client_id: cid,
