@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Team Insight v4.1</title>
+<title>Team Insight v4.5</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23185FA5'/%3E%3Ccircle cx='16' cy='11' r='4' fill='%23fff'/%3E%3Cpath d='M8 25c0-4.4 3.6-8 8-8s8 3.6 8 8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
@@ -20,6 +21,38 @@
   --danger:#E24B4A;
   --success:#639922;
   --warn:#BA7517;
+  --sidebar-bg:#1a1d23;
+  --sidebar-hover:#2d3139;
+  --radius-lg:12px;
+  --radius-md:8px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --shadow-md:0 4px 12px rgba(0,0,0,.1);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#0f1117;
+    --card:#1a1d23;
+    --border:#2d3139;
+    --text:#e5e7eb;
+    --muted:#9ca3af;
+    --accent-light:#1e3a5f;
+  }
+  body{color-scheme:dark}
+  .topbar{background:#1a1d23;border-bottom-color:#2d3139}
+  .btn{background:#2d3139;border-color:#3d4149;color:#e5e7eb}
+  .btn:hover{background:#383e4a}
+  .btn-primary{background:var(--accent);color:#fff}
+  input,textarea,select{background:#2d3139;border-color:#3d4149;color:#e5e7eb}
+  .metric{background:#2d3139}
+  .bila-entry,.fb-card,.goal-card,.task-item{background:var(--card)}
+  .sr-item:hover,.sr-section{background:#2d3139}
+  #search-dropdown{background:#1a1d23;border-color:#3d4149}
+  #search-input-wrap{background:#2d3139}
+  .filter-bar{background:#1a1d23}
+  em.hl{background:#854F0B;color:#fff}
+  .tl-card{background:#2d3139}
+  .topbar-title{color:#e5e7eb}
+  #notif-banner{background:#0f1117}
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;display:flex}
 /* SIDEBAR */
@@ -56,12 +89,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
 .card-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
-.metric{background:var(--bg);border-radius:8px;padding:12px 14px}
-.metric-label{font-size:11px;color:var(--muted);margin-bottom:4px}
-.metric-val{font-size:20px;font-weight:600}
-.metric-val.good{color:var(--success)}
-.metric-val.warn{color:var(--warn)}
-.metric-val.bad{color:var(--danger)}
+.metric{background:var(--bg);border-radius:var(--radius-md);padding:14px 16px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;border:1px solid transparent;transition:box-shadow .15s}
+.metric:hover{box-shadow:var(--shadow-md)}
+.metric-icon{font-size:22px;line-height:1;margin-bottom:2px}
+.metric-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.metric-val{font-size:22px;font-weight:700;line-height:1}
+.metric-val.good{color:var(--success)}.metric-val.warn{color:var(--warn)}.metric-val.bad{color:var(--danger)}
+.metric-trend{font-size:11px;color:var(--muted);margin-top:2px}
+.metric.accent-blue{background:linear-gradient(135deg,#E6F1FB 0%,#dbeafe 100%);border-color:#bfdbfe}
+.metric.accent-green{background:linear-gradient(135deg,#EAF3DE 0%,#dcfce7 100%);border-color:#bbf7d0}
+.metric.accent-red{background:linear-gradient(135deg,#FCEBEB 0%,#fee2e2 100%);border-color:#fecaca}
+.metric.accent-amber{background:linear-gradient(135deg,#FAEEDA 0%,#fef3c7 100%);border-color:#fde68a}
+.metric.accent-purple{background:linear-gradient(135deg,#EEEDFE 0%,#ede9fe 100%);border-color:#ddd6fe}
+@media(prefers-color-scheme:dark){
+  .metric.accent-blue{background:#1e3a5f;border-color:#1d4ed8}
+  .metric.accent-green{background:#14532d;border-color:#166534}
+  .metric.accent-red{background:#7f1d1d;border-color:#991b1b}
+  .metric.accent-amber{background:#78350f;border-color:#92400e}
+  .metric.accent-purple{background:#4c1d95;border-color:#5b21b6}
+}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 /* TABLE */
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -176,6 +222,148 @@ textarea{resize:vertical;min-height:70px}
 .goal-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.07)}
 .goal-status-bar{height:4px;border-radius:2px;background:#e5e7eb;margin-top:8px;overflow:hidden}
 .goal-status-fill{height:100%;border-radius:2px;background:var(--accent);transition:width .3s}
+
+
+/* ── FEATURE 1: Dashboard widgets drag ── */
+.dw-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dw-card{cursor:grab;position:relative}.dw-card.dragging{opacity:.4}
+.dw-handle{position:absolute;top:8px;right:8px;color:var(--muted);cursor:grab;opacity:.4;font-size:12px}
+.dw-handle:hover{opacity:1}
+
+/* ── FEATURE 2: BILA templates ── */
+.tpl-card{border:1.5px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:border-color .15s,background .15s}
+.tpl-card:hover{border-color:var(--accent);background:var(--accent-light)}
+.tpl-card.selected{border-color:var(--accent);background:var(--accent-light)}
+
+/* ── FEATURE 3: Notification banner ── */
+#notif-banner{background:#1a1d23;color:#fff;font-size:12px;padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:52px;z-index:9;border-bottom:1px solid #2d3139}
+#notif-banner .nb-item{display:flex;align-items:center;gap:5px;cursor:pointer;padding:3px 8px;border-radius:20px;background:#2d3139;transition:background .15s}
+#notif-banner .nb-item:hover{background:#378ADD}
+#notif-banner .nb-item.red{background:rgba(226,75,74,.25)}
+#notif-banner .nb-item.amber{background:rgba(186,117,23,.2)}
+#notif-banner .nb-close{margin-left:auto;cursor:pointer;color:#6b7280;padding:2px 6px;border-radius:4px}
+#notif-banner .nb-close:hover{color:#fff}
+
+/* ── FEATURE 4: BILA frequency badge ── */
+.bila-freq-ok{color:var(--success)}.bila-freq-warn{color:var(--warn)}.bila-freq-late{color:var(--danger)}
+.freq-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px}
+.freq-ok{background:#EAF3DE;color:#3B6D11}.freq-warn{background:#FAEEDA;color:#854F0B}.freq-late{background:#FCEBEB;color:#A32D2D}
+
+/* ── FEATURE 5: Timeline ── */
+.timeline{position:relative;padding-left:26px}
+.timeline::before{content:'';position:absolute;left:9px;top:0;bottom:0;width:2px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:12px}
+.tl-dot{position:absolute;left:-22px;top:4px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px var(--border)}
+.tl-dot.bila{background:var(--accent)}.tl-dot.task{background:var(--success)}.tl-dot.feedback{background:#9333ea}.tl-dot.goal{background:var(--warn)}.tl-dot.followup{background:#ec4899}
+.tl-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;cursor:pointer;transition:box-shadow .15s}
+.tl-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.tl-meta{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── FEATURE 7: PDF export button ── */
+.pdf-btn{background:#dc2626;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.pdf-btn:hover{background:#b91c1c}
+
+/* ── FEATURE 8: Follow-up tracker ── */
+.fu-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #f0f2f5}
+.fu-item:last-child{border-bottom:none}
+.fu-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;background:var(--accent)}
+.fu-dot.done{background:var(--success)}.fu-dot.late{background:var(--danger)}
+
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1d23;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;transition:transform .3s,opacity .3s;opacity:0;pointer-events:none;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.ok::before{content:'✓';color:#4ade80}
+#toast.err::before{content:'✕';color:#f87171}
+/* DANGER ZONE */
+.danger-zone{border:2px solid var(--danger);border-radius:10px;padding:16px;background:#fff5f5}
+.danger-zone .card-title{color:var(--danger)}
+/* DRIVE STATUS PILL in sidebar */
+.drive-pill{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:auto}
+.drive-pill.ok{background:#EAF3DE;color:#3B6D11}
+.drive-pill.off{background:#F1EFE8;color:#5F5E5A}
+/* SETTINGS SECTION HEADER */
+.settings-section-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.settings-section-hd:first-child{margin-top:0}
+
+
+/* COLLAPSIBLE FILTER */
+.filter-toggle-btn{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:7px 12px;font-size:12px;font-weight:500;cursor:pointer;color:var(--muted);margin-bottom:10px;transition:all .15s}
+.filter-toggle-btn:hover{border-color:var(--accent);color:var(--accent)}
+.filter-toggle-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.filter-toggle-btn .ftb-count{background:var(--accent);color:#fff;border-radius:10px;padding:0 6px;font-size:10px;font-weight:700}
+.filter-panel{display:none;margin-bottom:10px}
+.filter-panel.open{display:block}
+
+/* CONTEXT MENU */
+.ctx-menu{position:fixed;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow-md);z-index:500;min-width:160px;overflow:hidden;animation:fadeIn .1s ease}
+@keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.ctx-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text);transition:background .1s}
+.ctx-item:hover{background:var(--bg)}
+.ctx-item.danger{color:var(--danger)}
+.ctx-item.danger:hover{background:#FEF2F2}
+.ctx-divider{height:1px;background:var(--border);margin:4px 0}
+/* task action buttons - hide text on mobile via class */
+.task-actions{display:flex;gap:4px;flex-shrink:0}
+@media(max-width:700px){
+  .task-actions .btn-txt{display:none}
+  .task-actions .btn{padding:6px 8px;min-width:32px;justify-content:center}
+  .task-actions-mobile{display:flex}
+}
+@media(min-width:701px){
+  .task-actions-mobile{display:none}
+}
+
+/* EMPTY STATES */
+.empty-state{text-align:center;padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty-state-icon{font-size:48px;line-height:1;opacity:.6}
+.empty-state-title{font-size:15px;font-weight:600;color:var(--text)}
+.empty-state-text{font-size:13px;color:var(--muted);max-width:280px;line-height:1.6}
+.empty-state-action{margin-top:4px}
+
+/* SIDEBAR IMPROVED */
+.sb-group{margin-bottom:4px}
+.sb-group-label{padding:10px 16px 4px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#4b5563;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:7px;margin:1px 8px;cursor:pointer;font-size:13px;color:#cbd5e1;transition:all .15s;position:relative}
+.sb-item:hover{background:#2d3139;color:#fff;transform:translateX(1px)}
+.sb-item.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(24,95,165,.35)}
+/* Tab scroll indicator */
+.tabs-wrap{position:relative}
+.tabs-wrap::after{content:'';position:absolute;right:0;top:0;bottom:2px;width:24px;background:linear-gradient(to right,transparent,var(--card));pointer-events:none;border-radius:0 4px 0 0}
+
+/* TOPBAR BUTTONS mobile */
+@media(max-width:700px){
+  .btn-topbar .btn-label{display:none}
+  .btn-topbar{padding:6px 10px;min-width:34px;justify-content:center}
+}
+
+/* GLOBAL SEARCH */
+#search-wrap{position:relative;display:flex;align-items:center}
+#search-toggle{background:none;border:none;cursor:pointer;padding:5px;color:var(--muted);display:flex;align-items:center;border-radius:6px;transition:background .15s}
+#search-toggle:hover{background:var(--bg);color:var(--text)}
+#search-input-wrap{position:absolute;right:32px;top:50%;transform:translateY(-50%);width:0;overflow:hidden;transition:width .25s;background:#fff;border:1.5px solid transparent;border-radius:8px;display:flex;align-items:center}
+#search-input-wrap.open{width:240px;border-color:var(--accent)}
+#search-input-wrap input{border:none;outline:none;font-size:13px;padding:6px 10px;flex:1;background:transparent;color:var(--text)}
+#search-input-wrap input::placeholder{color:var(--muted)}
+#search-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:200;max-height:420px;overflow-y:auto;display:none}
+#search-dropdown.open{display:block}
+.sr-section{padding:8px 12px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sr-item{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;cursor:pointer;transition:background .1s}
+.sr-item:hover{background:var(--bg)}
+.sr-item-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.sr-item-main{flex:1;min-width:0}
+.sr-item-title{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr-item-sub{font-size:11px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr-item-badge{font-size:10px;padding:1px 7px;border-radius:20px;flex-shrink:0;margin-top:2px}
+.sr-empty{padding:20px;text-align:center;font-size:13px;color:var(--muted)}
+.sr-footer{padding:8px 12px;border-top:1px solid var(--border);font-size:12px;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:6px}
+.sr-footer:hover{background:var(--bg)}
+em.hl{background:#fef9c3;border-radius:2px;font-style:normal}
+@media(max-width:700px){
+  #search-input-wrap.open{width:180px;right:28px}
+  #search-dropdown{width:calc(100vw - 20px);right:-10px}
+}
+
 /* FILTER BAR */
 .filter-bar{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
 .filter-bar > div{flex:1;min-width:120px}
@@ -226,6 +414,9 @@ textarea{resize:vertical;min-height:70px}
 .multi-team-badge{font-size:10px;background:#FAEEDA;color:#854F0B;border-radius:3px;padding:1px 5px;margin-left:4px}
 /* MOBILE */
 @media(max-width:700px){
+  /* Dashboard priority reorder */
+  .dash-col-left{order:2}.dash-col-right{order:1}
+  .dash-grid{display:flex;flex-direction:column}
   /* Sidebar */
   #hamburger{display:flex;align-items:center;justify-content:center}
   #sidebar{position:fixed;left:0;top:0;height:100vh;z-index:50;transform:translateX(-100%);width:280px}
@@ -321,6 +512,7 @@ textarea{resize:vertical;min-height:70px}
 </head>
 <body>
 
+<div id="toast"></div>
 <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <!-- SIDEBAR -->
@@ -353,6 +545,7 @@ textarea{resize:vertical;min-height:70px}
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12v8H9l-3 2v-2H2V3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 5.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
     Feedback-Tracking
   </div>
+  <div class="sb-group-label" style="margin-top:6px">Daten</div>
   <div class="sb-item" onclick="showView('ai');closeSidebar()" id="nav-ai">
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 9.5S6.5 11 8 11s2.5-1.5 2.5-1.5M6 7h.01M10 7h.01" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
     KI-Assistent
@@ -361,6 +554,15 @@ textarea{resize:vertical;min-height:70px}
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M5 2.5l1.5 1.5M11 2.5L9.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
     Entwicklungsziele
   </div>
+  <div class="sb-item" onclick="showView('followups');closeSidebar()" id="nav-followups">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Wiedervorlagen
+  </div>
+  <div class="sb-item" onclick="showView('search');closeSidebar()" id="nav-search">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Suche
+  </div>
+  <div class="sb-group-label" style="margin-top:6px">App</div>
   <div class="sb-item" onclick="showView('settings');closeSidebar()" id="nav-settings">
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
     Einstellungen
@@ -382,6 +584,15 @@ textarea{resize:vertical;min-height:70px}
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
     </button>
     <span class="topbar-title" id="topbar-title">Dashboard</span>
+    <div id="search-wrap">
+      <div id="search-input-wrap">
+        <input type="text" id="search-input" placeholder="Suchen…" oninput="globalSearch(this.value)" onkeydown="handleSearchKey(event)" autocomplete="off">
+      </div>
+      <button id="search-toggle" onclick="toggleSearch()" title="Suchen" aria-label="Suchen">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M12 12l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div id="search-dropdown"></div>
+    </div>
     <div class="topbar-actions" id="topbar-actions">
       <span id="sync-status"></span>
     </div>
@@ -440,7 +651,7 @@ const BILA_TYPES = ['Reguläres BILA','Probezeitgespräch','Jahresgespräch','En
 const PRIOS = ['Hoch','Mittel','Niedrig'];
 const CONF_LEVELS = ['Standard','Persönlich','Vertraulich','HR-relevant'];
 
-const APP_VERSION = '4.1';
+const APP_VERSION = '4.5';
 
 const DRIVE_FILENAME = 'teaminsight-data.json';
 
@@ -483,6 +694,7 @@ function googleSignIn(){
         localStorage.setItem('ti_guser', JSON.stringify(gUser));
       }catch(e){}
       setSyncStatus('ok','Angemeldet');
+      updateDrivePill();
       await loadFromDrive();
       renderSidebar(); renderDashboard();
       if(currentView==='settings') renderSettingsView();
@@ -496,6 +708,7 @@ function googleSignOut(){
   gAccessToken=null; gUser=null; gDriveFileId=null;
   localStorage.removeItem('ti_gtoken'); localStorage.removeItem('ti_gtoken_exp'); localStorage.removeItem('ti_guser');
   setSyncStatus('','');
+  updateDrivePill();
   if(currentView==='settings') renderSettingsView();
 }
 
@@ -523,7 +736,7 @@ async function saveToDrive(){
       method = 'PATCH';
     }
     const r = await fetch(url,{method,headers:{Authorization:'Bearer '+gAccessToken,'Content-Type':'application/json'},body:json});
-    if(r.ok) setSyncStatus('ok','Gespeichert ☁');
+    if(r.ok){ setSyncStatus('ok','Gespeichert ☁'); state._lastSync=new Date().toISOString(); localStorage.setItem('ti_state',JSON.stringify(state)); }
     else setSyncStatus('err','Drive-Fehler');
   } catch(e){ setSyncStatus('err','Fehler'); }
 }
@@ -578,6 +791,17 @@ let state = {
   nextMemberId: 1,
   nextBilaId: 1,
   nextTaskId: 1,
+  // Feature 4: BILA frequency per member stored on member.bilaFreqWeeks
+  // Feature 6: language stored in state.settings.lang
+  // Feature 8: followups stored in state.followups []
+  followups: [],
+  settings: {
+    clientId: '498089633917-rgqiqfol4p86dl588q0h3ck8gdii29iu.apps.googleusercontent.com',
+    localAutoBackup: false,
+    backupFilename: 'TeamInsight-Backup',
+    lang: 'de',
+    dashboardWidgets: ['tasks','bilas','devgoals','risks','team'],
+  },
 };
 
 let currentTeamId = null;  // active team filter
@@ -837,6 +1061,9 @@ function showView(view) {
   else if (view==='settings') renderSettingsView();
   else if (view==='feedback') renderFeedbackView();
   else if (view==='devgoals') renderDevGoalsView();
+  else if (view==='search') renderSearchView();
+  else if (view==='followups') renderFollowupsView();
+  else if (view==='timeline') { openMember(selectedMember||state.members[0]?.id); setTimeout(()=>setMemberTab('timeline'),50); }
 }
 
 function _setActiveSb(id) {
@@ -879,22 +1106,22 @@ function renderDashboard() {
 
   document.getElementById('topbar-actions').innerHTML = `
     <span id="sync-status"></span>
-    ${modEnabled('bilas')?'<button class="btn btn-sm" onclick="openNewBilaModal()" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">+ Gespräch</button>':''}
-    ${modEnabled('tasks')?'<button class="btn btn-sm" onclick="openNewTaskModal()" style="background:#dcfce7;border-color:#86efac;color:#166534">+ Aufgabe</button>':''}
-    ${modEnabled('devgoals')?'<button class="btn btn-sm" onclick="openDevGoalModal()" style="background:#fef3c7;border-color:#fcd34d;color:#92400e">+ Ziel</button>':''}
-    ${modEnabled('feedback')?'<button class="btn btn-sm" onclick="openFeedbackModal()" style="background:#fae8ff;border-color:#e879f9;color:#7e22ce">+ Feedback</button>':''}
+    ${modEnabled('bilas')?'<button class="btn btn-sm btn-topbar" onclick="openNewBilaModal()" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af" title="Gespräch erfassen">📅 <span class="btn-label">Gespräch</span></button>':''}
+    ${modEnabled('tasks')?'<button class="btn btn-sm btn-topbar" onclick="openNewTaskModal()" style="background:#dcfce7;border-color:#86efac;color:#166534" title="Aufgabe anlegen">✅ <span class="btn-label">Aufgabe</span></button>':''}
+    ${modEnabled('devgoals')?'<button class="btn btn-sm btn-topbar" onclick="openDevGoalModal()" style="background:#fef3c7;border-color:#fcd34d;color:#92400e" title="Ziel anlegen">🎯 <span class="btn-label">Ziel</span></button>':''}
+    ${modEnabled('feedback')?'<button class="btn btn-sm btn-topbar" onclick="openFeedbackModal()" style="background:#fae8ff;border-color:#e879f9;color:#7e22ce" title="Feedback erfassen">💬 <span class="btn-label">Feedback</span></button>':''}
   `;
 
   document.getElementById('content').innerHTML = `
     <div class="metric-grid">
-      <div class="metric"><div class="metric-label">Mitglieder</div><div class="metric-val">${members.length}</div></div>
-      <div class="metric"><div class="metric-label">Offene Aufgaben</div><div class="metric-val ${openTasks>5?'warn':''}">${openTasks}</div></div>
-      <div class="metric"><div class="metric-label">Überfällig</div><div class="metric-val ${overdueTasks>0?'bad':''}">${overdueTasks}</div></div>
-      <div class="metric"><div class="metric-label">Gespräche (7T)</div><div class="metric-val">${bilas.filter(b=>{const diff=(new Date(b.date)-new Date())/(864e5);return diff>=-7&&diff<=7;}).length}</div></div>
+      ${metricCard('👥','Mitglieder',members.length,'accent-blue')}
+      ${metricCard('✅','Offene Aufgaben',openTasks,'accent-'+(openTasks>5?'amber':'green'),openTasks>5?'⚠ Prüfen empfohlen':'')}
+      ${metricCard('🔴','Überfällig',overdueTasks,'accent-'+(overdueTasks>0?'red':'green'),overdueTasks>0?overdueTasks+' sofort angehen':' Alles im Zeitplan')}
+      ${metricCard('📅','Gespräche (7T)',bilas.filter(b=>{const diff=(new Date(b.date)-new Date())/(864e5);return diff>=-7&&diff<=7;}).length,'accent-blue','')}
     </div>
 
-    <div class="grid2">
-      <div>
+    <div class="grid2 dash-grid">
+      <div class="dash-col-left">
         ${modEnabled('tasks')?`<div class="card" style="margin-bottom:16px">
           <div class="section-head"><span class="section-title">Nächste Aufgaben</span><button class="btn btn-sm" onclick="showView('tasks')">Alle →</button></div>
           ${openTasksList.length===0?'<div class="empty" style="padding:20px 0">Keine offenen Aufgaben</div>':
@@ -920,7 +1147,7 @@ function renderDashboard() {
           risks.map(r=>`<div class="risk-item"><div class="risk-dot dot-${r.level}"></div><div><div style="font-size:13px">${r.text}</div><div style="font-size:11px;color:var(--muted)">${r.sub}</div></div></div>`).join('')}
         </div>
       </div>
-      <div>
+      <div class="dash-col-right">
         ${modEnabled('bilas')?`<div class="card" style="margin-bottom:16px">
           <div class="section-head"><span class="section-title">Letzte Gespräche</span><button class="btn btn-sm" onclick="showView('bilas')">Alle →</button></div>
           ${recentBilas.length===0?'<div class="empty" style="padding:20px 0">Noch keine Gespräche</div>':
@@ -1102,13 +1329,14 @@ function renderMemberView(id) {
         <div class="metric" style="min-width:65px;text-align:center"><div class="metric-label">Offen</div><div class="metric-val ${memberTasks.filter(t=>t.status!=='Erledigt').length>0?'warn':''}" style="font-size:18px">${memberTasks.filter(t=>t.status!=='Erledigt').length}</div></div>
       </div>
     </div>
-    <div class="tabs">
+    <div class="tabs-wrap"><div class="tabs">
       <div class="tab ${selectedMemberTab==='bilas'?'active':''}" onclick="setMemberTab('bilas')">Gespräche (${memberBilas.length})</div>
       <div class="tab ${selectedMemberTab==='tasks'?'active':''}" onclick="setMemberTab('tasks')">Aufgaben (${memberTasks.length})</div>
       <div class="tab ${selectedMemberTab==='dev'?'active':''}" onclick="setMemberTab('dev')">Entwicklung</div>
       <div class="tab ${selectedMemberTab==='memberfeedback'?'active':''}" onclick="setMemberTab('memberfeedback')">Feedback</div>
+      <div class="tab ${selectedMemberTab==='timeline'?'active':''}" onclick="setMemberTab('timeline')">Zeitachse</div>
       <div class="tab ${selectedMemberTab==='profile'?'active':''}" onclick="setMemberTab('profile')">Profil</div>
-    </div>
+    </div></div>
     <div id="member-tab-content"></div>
   `;
   renderMemberTab(id);
@@ -1221,6 +1449,8 @@ function renderMemberTab(id) {
   } else if (selectedMemberTab==='memberfeedback') {
     cont.innerHTML = renderMemberFeedbackTab(id);
 
+  } else if (selectedMemberTab==='timeline') {
+    cont.innerHTML = renderTimeline(id);
   } else if (selectedMemberTab==='profile') {
     const m2 = getMember(id);
     function row(label, val) {
@@ -1359,7 +1589,7 @@ function renderDevGoalList(goals, memberId) {
   if (prio)              filtered = filtered.filter(g=>(g.priority||'')===prio);
   if (status==='open')   filtered = filtered.filter(g=>!g.achieved);
   if (status==='achieved') filtered = filtered.filter(g=>g.achieved);
-  if (!filtered.length) return '<div class="empty" style="padding:20px 0">Keine Ziele gefunden</div>';
+  if (!filtered.length) return emptyState('🎯','Keine Ziele','Noch keine Entwicklungsziele oder Filter anpassen.','+ Neues Ziel',`openDevGoalModal(${memberId})`);
   const open = filtered.filter(g=>!g.achieved);
   const done = filtered.filter(g=>g.achieved);
   return `
@@ -2022,17 +2252,19 @@ function renderTaskList({open, done}) {
         </div>
         ${t.desc?`<div style="font-size:12px;color:var(--muted);margin-top:3px">${t.desc}</div>`:''}
       </div>
-      <div style="display:flex;gap:4px;flex-shrink:0">
-        <button class="btn btn-sm" title="Bearbeiten" onclick="editTask(${t.id})">&#9998;</button>
+      <div class="task-actions">
+        <button class="btn btn-sm" title="Bearbeiten" onclick="editTask(${t.id})">✏ <span class="btn-txt">Bearbeiten</span></button>
+        <button class="btn btn-sm task-actions-mobile" title="Mehr" onclick="showCtxMenu(event,[{icon:'✏',label:'Bearbeiten',action:'()=>editTask(${t.id})'},{icon:'⧉',label:'Duplizieren',action:'()=>duplicateTask(${t.id})'},{label:'–'},{icon:'🗑',label:'Löschen',danger:true,action:'()=>deleteTask(${t.id})'}])">⋯</button>
         <button class="btn btn-sm" title="Duplizieren" onclick="duplicateTask(${t.id})" style="color:var(--accent);border-color:var(--accent)">⧉</button>
-        <button class="btn btn-sm" title="Löschen" onclick="deleteTask(${t.id})" style="color:var(--danger);border-color:var(--danger)">&#215;</button>
+        <button class="btn btn-sm" title="Löschen" onclick="deleteTask(${t.id})" style="color:var(--danger);border-color:var(--danger)">✕</button>
       </div>
     </div>`;
   }
+  const emptyOpen = emptyState('✅','Keine offenen Aufgaben','Alle Aufgaben erledigt oder Filter anpassen.','+ Neue Aufgabe','openNewTaskModal()');
   return `
     <div class="card" style="margin-bottom:14px">
       <div class="card-title">Offen (${open.length})</div>
-      ${open.length===0?'<div style="color:var(--muted);font-size:13px">Keine Aufgaben gefunden 🎉</div>':open.map(t=>taskRow(t,false)).join('')}
+      ${open.length===0?emptyOpen:open.map(t=>taskRow(t,false)).join('')}
     </div>
     ${done.length?`<div class="card">
       <div class="card-title" style="color:var(--muted)">Erledigt (${done.length})</div>
@@ -2139,7 +2371,7 @@ function clearBilaFilters() {
 }
 
 function renderBilaList(bilas) {
-  if (!bilas.length) return '<div class="empty">Keine Gespräche gefunden</div>';
+  if (!bilas.length) return emptyState('📅','Keine Gespräche gefunden','Ändere den Filter oder erfasse das erste Gespräch.','+ Gespräch','openNewBilaModal()');
   return bilas.map(b=>{
     const m = getMember(b.memberId);
     const gi = state.members.indexOf(m);
@@ -2246,6 +2478,7 @@ function openBilaDetail(id) {
     <div style="display:flex;gap:8px;margin-top:20px;padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap">
       <button class="btn btn-primary btn-sm" onclick="editBila(${id})">Bearbeiten</button>
       <button class="btn btn-sm" onclick="openNewTaskModal(${b.memberId},${id})">+ Aufgabe</button>
+      <button class="btn btn-sm" onclick="openFollowupModal(${id},${b.memberId})" style="background:#fdf4ff;border-color:#e879f9;color:#7e22ce">🔁 Wiedervorlage</button>
       <button class="btn btn-sm btn-danger" onclick="deleteBila(${id})" style="margin-left:auto">Löschen</button>
     </div>
   `;
@@ -2810,62 +3043,47 @@ function clearAIHistory() { state.aiHistory=[]; save(); renderAIView(); }
 function renderSettingsView() {
   document.getElementById('topbar-actions').innerHTML = '<span id="sync-status"></span>';
   const s = state.settings || {};
+  const lang = s.lang || 'de';
+
+  // Compute rich stats
+  const totalBilas = state.bilas.length;
+  const totalMembers = state.members.length;
+  const totalTasks = state.tasks.length;
+  const openTasks = state.tasks.filter(t=>t.status!=='Erledigt').length;
+  const doneTasks = totalTasks - openTasks;
+  const totalFbs = (state.feedbacks||[]).length;
+  const totalGoals = state.members.reduce((s,m)=>s+(m.devGoals||[]).length,0);
+  const achievedGoals = state.members.reduce((s,m)=>s+(m.devGoals||[]).filter(g=>g.achieved).length,0);
+  const totalFu = (state.followups||[]).length;
+  const openFu = (state.followups||[]).filter(f=>!f.done).length;
+  const avgBila = totalMembers ? (totalBilas/totalMembers).toFixed(1) : '–';
+  const lastSync = state._lastSync ? new Date(state._lastSync).toLocaleString('de-CH') : '–';
+  const dataSize = (new Blob([JSON.stringify(state)]).size/1024).toFixed(1);
 
   document.getElementById('content').innerHTML = `
-    <div style="max-width:640px">
+    <div style="max-width:680px">
 
-      <!-- TEAMS -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="section-head"><span class="card-title">Teams (${state.teams.length})</span><button class="btn btn-primary btn-sm" onclick="openTeamModal()">+ Team</button></div>
-        ${state.teams.length===0?'<div style="color:var(--muted);font-size:13px">Noch keine Teams angelegt.</div>':
-        state.teams.map(t=>`<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f2f5;gap:10px">
-          <div style="flex:1;min-width:0"><span style="font-size:13px;font-weight:500">${t.name}</span>
-          <span style="font-size:11px;color:var(--muted);margin-left:8px">${state.members.filter(m=>(m.teamIds||[]).includes(t.id)).length} Mitglieder</span>
-          ${t.notes?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${t.notes}</div>`:''}</div>
-          <button class="btn btn-sm" onclick="openTeamModal(${t.id})">Bearbeiten</button>
-        </div>`).join('')}
-      </div>
-
-      <!-- MODULE -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-title">Module ein-/ausschalten</div>
-        ${[{key:'tasks',icon:'✅',label:'Aufgaben',sub:'Aufgabenverwaltung'},{key:'bilas',icon:'📅',label:'Gespräche',sub:'BILA-Verwaltung'},{key:'feedback',icon:'💬',label:'Feedback-Tracking',sub:'Feedback erfassen'},{key:'devgoals',icon:'🎯',label:'Entwicklungsziele',sub:'Ziele und Fortschritt'},{key:'ai',icon:'🤖',label:'KI-Assistent',sub:'KI-gestützte Analysen'}].map(m=>`<div style="display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid #f0f2f5">
-          <input type="checkbox" id="mod-${m.key}" ${(state.modules||{})[m.key]!==false?'checked':''} onchange="toggleModule('${m.key}',this.checked)" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer">
-          <div><div style="font-size:13px;font-weight:500">${m.icon} ${m.label}</div><div style="font-size:12px;color:var(--muted)">${m.sub}</div></div>
-        </div>`).join('')}
-      </div>
-
-      <!-- STATISTIKEN -->
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-title">Statistiken</div>
-        <div class="metric-grid">
-          <div class="metric"><div class="metric-label">Teams</div><div class="metric-val">${state.teams.length}</div></div>
-          <div class="metric"><div class="metric-label">Mitglieder</div><div class="metric-val">${state.members.length}</div></div>
-          <div class="metric"><div class="metric-label">Gespräche</div><div class="metric-val">${state.bilas.length}</div></div>
-          <div class="metric"><div class="metric-label">Aufgaben</div><div class="metric-val">${state.tasks.length}</div></div>
-        </div>
-      </div>
-
-      <!-- DATENSICHERUNG – GOOGLE DRIVE (EMPFOHLEN) -->
-      <div style="border-radius:14px;overflow:hidden;border:1.5px solid #e0e7ff;margin-bottom:14px">
-
-        <!-- HEADER -->
-        <div style="background:linear-gradient(135deg,#1a1d23 0%,#2d3748 100%);padding:20px;display:flex;align-items:center;gap:14px">
-          <div style="width:42px;height:42px;border-radius:50%;background:#4285f4;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M6 20.5l3-5.2h10l-3 5.2z"/><path fill="#fff" opacity=".7" d="M2 15.3L5 10l5 8.7H4z"/><path fill="#fff" opacity=".5" d="M15 10H9L6 5h9z"/></svg>
+      <!-- ══ GOOGLE DRIVE BACKUP (first — most critical) ══ -->
+      <div class="settings-section-hd">☁️ Datensicherung</div>
+      <div style="border-radius:14px;overflow:hidden;border:1.5px solid #e0e7ff;margin-bottom:20px">
+        <div style="background:linear-gradient(135deg,#1a1d23 0%,#2d3748 100%);padding:18px 20px;display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:50%;background:#4285f4;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M6 20.5l3-5.2h10l-3 5.2z"/><path fill="#fff" opacity=".7" d="M2 15.3L5 10l5 8.7H4z"/><path fill="#fff" opacity=".5" d="M15 10H9L6 5h9z"/></svg>
           </div>
           <div style="flex:1">
             <div style="font-size:15px;font-weight:700;color:#fff">Datensicherung</div>
-            <div style="font-size:12px;color:#94a3b8;margin-top:2px">Sichere alle deine Daten in der Cloud oder lokal herunter</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:2px">Sichere alle Daten in Google Drive oder lokal</div>
           </div>
+          ${isSignedIn()
+            ? `<span style="background:#22c55e;color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px">● Verbunden</span>`
+            : `<span style="background:#6b7280;color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px">Nicht angemeldet</span>`}
         </div>
 
-        <div style="padding:20px">
-
-          <!-- GOOGLE DRIVE CARD -->
-          <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="padding:18px">
+          <!-- GOOGLE DRIVE -->
+          <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:16px;margin-bottom:12px">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-              <svg width="32" height="32" viewBox="0 0 24 24"><path fill="#4285f4" d="M6 20.5l3-5.2h10l-3 5.2z"/><path fill="#0f9d58" d="M2 15.3L5 10l5 8.7H4z"/><path fill="#ffbb00" d="M15 10H9L6 5h9z"/></svg>
+              <svg width="30" height="30" viewBox="0 0 24 24"><path fill="#4285f4" d="M6 20.5l3-5.2h10l-3 5.2z"/><path fill="#0f9d58" d="M2 15.3L5 10l5 8.7H4z"/><path fill="#ffbb00" d="M15 10H9L6 5h9z"/></svg>
               <div style="flex:1">
                 <div style="display:flex;align-items:center;gap:8px">
                   <span style="font-size:14px;font-weight:600;color:#166534">Google Drive</span>
@@ -2877,14 +3095,15 @@ function renderSettingsView() {
 
             ${isSignedIn() ? `
               <div style="background:#dcfce7;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px">
-                ${gUser&&gUser.picture?`<img src="${gUser.picture}" style="width:32px;height:32px;border-radius:50%;flex-shrink:0">`:``}
+                ${gUser&&gUser.picture ? `<img src="${gUser.picture}" style="width:32px;height:32px;border-radius:50%;flex-shrink:0">` : ''}
                 <div style="flex:1;min-width:0">
                   <div style="font-size:13px;font-weight:600;color:#15803d">${gUser&&gUser.name||'Angemeldet'} ✓</div>
-                  <div style="font-size:11px;color:#16a34a">${gUser&&gUser.email||''} · Daten werden automatisch gespeichert</div>
+                  <div style="font-size:11px;color:#16a34a">${gUser&&gUser.email||''}</div>
+                  <div style="font-size:11px;color:#16a34a;margin-top:2px">Letzte Synchronisation: ${lastSync}</div>
                 </div>
                 <button onclick="googleSignOut()" style="background:none;border:1px solid #16a34a;color:#15803d;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;flex-shrink:0">Abmelden</button>
               </div>
-              <button onclick="loadFromDrive().then(()=>{renderTeamSelector();renderSidebar();renderSettingsView();})" style="background:#fff;border:1.5px solid #86efac;color:#15803d;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;width:100%">⟳ Jetzt von Google Drive laden</button>
+              <button onclick="loadFromDrive().then(()=>{renderTeamSelector();renderSidebar();renderSettingsView();showToast('✓ Daten geladen');})" style="background:#fff;border:1.5px solid #86efac;color:#15803d;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;width:100%">⟳ Jetzt von Google Drive laden</button>
             ` : `
               <p style="font-size:13px;color:#166534;margin-bottom:14px;line-height:1.6">Klicke auf «Mit Google anmelden» — dein Browser öffnet ein Google-Fenster. Wähle dein Konto und erlaube den Zugriff.</p>
               <button onclick="googleSignIn()" style="width:100%;background:#4285f4;color:#fff;border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
@@ -2894,97 +3113,210 @@ function renderSettingsView() {
               <div style="text-align:center;font-size:11px;color:#16a34a;margin-top:8px">Die App speichert Daten nur in deiner eigenen Google Drive. Niemand sonst hat Zugriff.</div>
             `}
 
-            <!-- SETUP ANLEITUNG (für App-Betreiber, einmalig) -->
             <details style="margin-top:14px">
               <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#15803d;list-style:none;display:flex;align-items:center;gap:6px;padding:4px 0">
                 <span style="width:18px;height:18px;border-radius:50%;background:#15803d;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">?</span>
-                ⚙️ Setup (einmalig, nur für den App-Betreiber)
+                ⚙️ Setup-Anleitung (einmalig, nur für App-Betreiber)
               </summary>
-              <details style="margin-top:8px;margin-left:14px">
-                <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#1d4ed8;list-style:none;display:flex;align-items:center;gap:6px;padding:4px 0">
-                  <span style="width:16px;height:16px;border-radius:50%;background:#1d4ed8;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">📖</span>
-                  Setup-Anleitung für App-Betreiber (einmalig)
-                </summary>
-                <div style="margin-top:10px;background:#eff6ff;border-radius:8px;padding:14px">
-                  <div style="background:#fef9c3;border-radius:6px;padding:8px 10px;font-size:12px;color:#92400e;margin-bottom:12px">
-                    ⚠️ Nur <strong>du</strong> musst diese Schritte einmal ausführen. Danach können alle einfach «Mit Google anmelden» klicken.
-                  </div>
-                  ${[
-                    ['🐙 App auf GitHub Pages hosten',
-                     'Gehe zu <a href="https://github.com" target="_blank" style="color:var(--accent)">github.com</a> → kostenloses Konto erstellen<br>Oben rechts «+» → «New repository» · Name: <code style="background:#fff;padding:1px 5px;border-radius:3px">team-insight</code> (lowercase!) · Public → Create<br>«uploading an existing file» → lade <code>index.html</code> hoch → «Commit changes»<br>«Settings» → «Pages» → Source: <strong>Deploy from a branch</strong> → Branch: <strong>main</strong> → «Save»<br>✅ Nach 2–3 Min: <code>https://deinname.github.io/team-insight/</code> (alles lowercase!)'],
-                    ['🔵 Google Cloud Projekt + Drive API aktivieren',
-                     'Gehe zu <a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent)">console.cloud.google.com</a><br>Oben links «Select a project» → «New Project» → Name: <em>Team-Insight</em> → «Create»<br>Linkes Menü «APIs &amp; Services» → «Library» → <strong>Google Drive API</strong> suchen → «Enable»'],
-                    ['📋 OAuth-Zustimmungsbildschirm konfigurieren',
-                     '«APIs &amp; Services» → «Google Auth Platform» (= OAuth Consent Screen)<br>«Branding» → App name: <em>Team Insight</em> · Support email: deine Gmail → «Save»<br>«Audience» → <strong>External</strong> → «Save»<br>«Data Access» → «Add or remove scopes» → <code>drive.appdata</code> → «Update» → «Save»<br>«Audience» → wieder klicken → «<strong>Publish App</strong>» → «Confirm» ← <strong>sehr wichtig! Sonst können andere sich nicht anmelden</strong>'],
-                    ['🔑 OAuth Client ID erstellen',
-                     '«APIs &amp; Services» → «Google Auth Platform» → «Clients» → «+ Create client»<br>Typ: <strong>Web application</strong> · Name: Team Insight<br>«Authorized JavaScript origins» → «+ Add URI» → <code>https://deinname.github.io</code><br>«Authorized redirect URIs» → «+ Add URI» → <code>https://deinname.github.io/team-insight/</code> (mit trailing slash!)<br>«Create» → <strong>Client ID</strong> kopieren (sieht so aus: <code>123456789-xxx.apps.googleusercontent.com</code>)'],
-                    ['⚙️ Client ID eintragen + neu hochladen',
-                     'Client ID unten in das Feld einfügen → «💾 Speichern & Neu laden»<br>Dann <code>index.html</code> erneut auf GitHub hochladen → alle können «Mit Google anmelden» nutzen!'],
-                  ].map(([t,d],i)=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #dbeafe">
-                    <div style="width:22px;height:22px;border-radius:50%;background:#1e40af;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
-                    <div><strong style="font-size:12px">${t}</strong><div style="font-size:12px;color:#4b5563;margin-top:3px;line-height:1.7">${d}</div></div>
-                  </div>`).join('')}
-
-                  <!-- COMMON ERRORS -->
-                  <div style="margin-top:14px;padding-top:12px;border-top:1px solid #93c5fd">
-                    <div style="font-size:12px;font-weight:700;color:#991b1b;margin-bottom:8px">⚠️ Häufige Fehler</div>
-                    <div style="font-size:11px;line-height:2;color:#4b5563">
-                      <span style="color:var(--danger);font-weight:600">redirect_uri_mismatch</span> – URL in Google Console muss exakt mit Browser-URL übereinstimmen (Groß-/Kleinschreibung + trailing slash)<br>
-                      <span style="color:var(--danger);font-weight:600">access_denied 403</span> – «Publish App» in Audience vergessen<br>
-                      <span style="color:var(--danger);font-weight:600">404 auf GitHub</span> – Datei muss exakt <code>index.html</code> heissen<br>
-                      <span style="color:var(--danger);font-weight:600">Invalid domain</span> – «Authorized domains» in Branding leer lassen
-                    </div>
-                  </div>
+              <div style="margin-top:10px;background:#eff6ff;border-radius:8px;padding:14px">
+                <div style="background:#fef9c3;border-radius:6px;padding:8px 10px;font-size:12px;color:#92400e;margin-bottom:12px">⚠️ Nur <strong>du</strong> musst diese Schritte einmal ausführen. Danach können alle «Mit Google anmelden» klicken.</div>
+                ${[
+                  ['🐙 App auf GitHub Pages hosten','<a href="https://github.com" target="_blank" style="color:var(--accent)">github.com</a> → Konto erstellen → «New repository» · Name: <code style="background:#fff;padding:1px 5px;border-radius:3px">team-insight</code> (lowercase!) · Public<br>«uploading an existing file» → <code>index.html</code> hochladen → «Settings» → «Pages» → Branch: main<br>✅ URL: <code>https://deinname.github.io/team-insight/</code>'],
+                  ['🔵 Google Cloud + Drive API','<a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent)">console.cloud.google.com</a> → «New Project» → «APIs & Services» → «Library» → <strong>Google Drive API</strong> → Enable'],
+                  ['📋 OAuth Consent Screen','«APIs & Services» → «Google Auth Platform» → External → <code>drive.appdata</code> Scope → «<strong>Publish App</strong>» ← wichtig!'],
+                  ['🔑 OAuth Client ID','«Credentials» → «Create Credentials» → «OAuth client ID» · Typ: Web application<br>JS Origins: <code>https://deinname.github.io</code><br>Redirect URIs: <code>https://deinname.github.io/team-insight/</code> (trailing slash!)'],
+                  ['⚙️ Client ID eintragen','Client ID unten einfügen → Speichern → index.html neu hochladen'],
+                ].map(([t,d],i)=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #dbeafe">
+                  <div style="width:22px;height:22px;border-radius:50%;background:#1e40af;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+                  <div><strong style="font-size:12px">${t}</strong><div style="font-size:12px;color:#4b5563;margin-top:3px;line-height:1.7">${d}</div></div>
+                </div>`).join('')}
+                <div style="margin-top:12px;font-size:11px;line-height:2;color:#4b5563">
+                  <strong style="color:#991b1b">Häufige Fehler:</strong><br>
+                  <span style="color:var(--danger);font-weight:500">redirect_uri_mismatch</span> – URL exakt mit trailing slash<br>
+                  <span style="color:var(--danger);font-weight:500">access_denied 403</span> – «Publish App» vergessen<br>
+                  <span style="color:var(--danger);font-weight:500">404 GitHub</span> – Datei muss <code>index.html</code> heissen<br>
+                  <span style="color:var(--danger);font-weight:500">Invalid domain</span> – «Authorized domains» in Branding leer lassen
                 </div>
-              </details>
+              </div>
             </details>
 
-            <!-- CLIENT ID FELD -->
             <div style="margin-top:14px;padding-top:14px;border-top:1px solid #86efac">
               <label style="font-size:12px;font-weight:600;color:#15803d;display:block;margin-bottom:6px">Google Client ID</label>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <input type="text" id="s-clientid" value="${(s.clientId)||''}" placeholder="123456789-xxx.apps.googleusercontent.com" style="flex:1;min-width:200px;font-size:12px;border:1px solid #86efac;border-radius:6px;padding:8px 10px;background:#fff">
+                <input type="text" id="s-clientid" value="${(s.clientId||'')}" placeholder="123456789-xxx.apps.googleusercontent.com" style="flex:1;min-width:200px;font-size:12px;border:1px solid #86efac;border-radius:6px;padding:8px 10px;background:#fff">
                 <button onclick="saveClientId()" style="background:#15803d;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">💾 Speichern & Neu laden</button>
               </div>
             </div>
           </div>
 
-          <!-- LOKALER EXPORT / IMPORT -->
+          <!-- LOCAL BACKUP -->
           <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:12px;padding:16px">
             <div style="font-size:14px;font-weight:600;color:#92400e;margin-bottom:6px">📁 Lokaler Export / Import</div>
             <div style="font-size:12px;color:#b45309;margin-bottom:12px">Als Sicherheitskopie oder für Geräte ohne Google-Anmeldung.</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button onclick="localBackup()" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer">📥 Exportieren (.json)</button>
-              <button onclick="document.getElementById('import-file-s').click()" style="background:#fff;border:1.5px solid #fcd34d;color:#92400e;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer">📤 Importieren</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+              <input type="text" id="s-backupname" value="${s.backupFilename||'TeamInsight-Backup'}" style="flex:1;min-width:150px;font-size:12px;padding:7px 10px;border:1px solid #fcd34d;border-radius:6px;background:#fff" onchange="saveBackupName()" placeholder="Dateiname">
+              <button onclick="localBackup()" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">📥 Exportieren (.json)</button>
+              <button onclick="document.getElementById('import-file-s').click()" style="background:#fff;border:1.5px solid #fcd34d;color:#92400e;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">📤 Importieren</button>
               <input type="file" id="import-file-s" accept=".json" style="display:none" onchange="importLocalData(event)">
             </div>
-            <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px">
               <input type="checkbox" id="s-autobackup" ${s.localAutoBackup?'checked':''} onchange="saveAutoBackup()" style="width:14px;height:14px;cursor:pointer;accent-color:#d97706">
               <label for="s-autobackup" style="font-size:12px;color:#92400e;cursor:pointer">⚡ Nach jeder Änderung automatisch herunterladen</label>
             </div>
           </div>
-
         </div>
       </div>
 
-      <!-- DEMO + RESET + ABOUT -->
+      <!-- ══ TEAMS ══ -->
+      <div class="settings-section-hd">👥 Teams</div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="section-head"><span class="card-title">Teams (${state.teams.length})</span><button class="btn btn-primary btn-sm" onclick="openTeamModal()">+ Team</button></div>
+        ${state.teams.length===0
+          ? '<div style="color:var(--muted);font-size:13px">Noch keine Teams angelegt.</div>'
+          : state.teams.map(t=>`<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f2f5;gap:10px">
+              <div style="flex:1;min-width:0">
+                <span style="font-size:13px;font-weight:500">${t.name}</span>
+                <span style="font-size:11px;color:var(--muted);margin-left:8px">${state.members.filter(m=>(m.teamIds||[]).includes(t.id)).length} Mitglieder · ${state.bilas.filter(b=>b.teamId===t.id).length} Gespräche</span>
+                ${t.notes?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${t.notes}</div>`:''}
+              </div>
+              <button class="btn btn-sm" onclick="openTeamModal(${t.id})">Bearbeiten</button>
+            </div>`).join('')}
+      </div>
+
+      <!-- ══ MODULE ══ -->
+      <div class="settings-section-hd">🧩 Module</div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title" style="margin-bottom:4px">Module ein-/ausschalten</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Deaktivierte Module werden aus der Navigation und dem Dashboard ausgeblendet.</p>
+        ${[
+          {key:'tasks',icon:'✅',label:'Aufgaben',sub:'Aufgabenverwaltung'},
+          {key:'bilas',icon:'📅',label:'Gespräche',sub:'BILA-Verwaltung und Gesprächs-Tab'},
+          {key:'feedback',icon:'💬',label:'Feedback-Tracking',sub:'Feedback erfassen und tracken'},
+          {key:'devgoals',icon:'🎯',label:'Entwicklungsziele',sub:'Ziele, Subtasks und Fortschritt'},
+          {key:'ai',icon:'🤖',label:'KI-Assistent',sub:'KI-gestützte Analysen und Antworten'},
+        ].map(m=>`<div style="display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid #f0f2f5">
+          <input type="checkbox" id="mod-${m.key}" ${(state.modules||{})[m.key]!==false?'checked':''} onchange="toggleModule('${m.key}',this.checked)" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer;accent-color:var(--accent)">
+          <div style="flex:1"><div style="font-size:13px;font-weight:500">${m.icon} ${m.label}</div><div style="font-size:12px;color:var(--muted)">${m.sub}</div></div>
+          <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;${(state.modules||{})[m.key]!==false?'background:#EAF3DE;color:#3B6D11':'background:#F1EFE8;color:#5F5E5A'}">${(state.modules||{})[m.key]!==false?'Aktiv':'Inaktiv'}</span>
+        </div>`).join('')}
+      </div>
+
+      <!-- ══ DASHBOARD & SPRACHE ══ -->
+      <div class="settings-section-hd">🖥️ Dashboard & Sprache</div>
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+          <div>
+            <div style="font-size:13px;font-weight:500">Dashboard-Widgets</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">${getWidgetOrder().length} von ${WIDGET_DEFS.length} Karten aktiv</div>
+          </div>
+          <button class="btn btn-sm" onclick="openWidgetConfig()">⚙ Widgets anpassen</button>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:14px">
+          <div style="font-size:13px;font-weight:500;margin-bottom:8px">Sprache / Language</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm ${lang==='de'?'btn-primary':''}" onclick="setLang('de')">🇩🇪 Deutsch</button>
+            <button class="btn btn-sm ${lang==='en'?'btn-primary':''}" onclick="setLang('en')">🇬🇧 English</button>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px">
+          <div style="font-size:13px;font-weight:500;margin-bottom:8px">Standard-Einstellungen für neue Mitglieder</div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <label style="font-size:12px;color:var(--muted)">Standard BILA-Häufigkeit:</label>
+            <select id="s-default-bilafreq" onchange="saveDefaultBilaFreq()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px">
+              ${[1,2,3,4,6,8,12].map(w=>`<option value="${w}" ${(s.defaultBilaFreq||4)===w?'selected':''}>${w} Woche${w===1?'':'n'}</option>`).join('')}
+            </select>
+            <label style="font-size:12px;color:var(--muted)">Standard Aufgaben-Priorität:</label>
+            <select id="s-default-prio" onchange="saveDefaultPrio()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px">
+              ${['Hoch','Mittel','Niedrig'].map(p=>`<option ${(s.defaultPrio||'Mittel')===p?'selected':''}>${p}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px;display:flex;align-items:flex-start;gap:12px">
+          <input type="checkbox" id="s-privacy" ${s.privacyMode?'checked':''} onchange="savePrivacyMode()" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer;accent-color:var(--accent)">
+          <div>
+            <div style="font-size:13px;font-weight:500">🔒 Datenschutz-Modus</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Vertrauliche Felder (private Notizen, Notfallkontakte, Familienstand) werden ausgegraut dargestellt – nützlich wenn jemand zuschaut.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STATISTIKEN ══ -->
+      <div class="settings-section-hd">📊 Statistiken</div>
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px">
+          <div class="metric"><div class="metric-label">Teams</div><div class="metric-val">${state.teams.length}</div></div>
+          <div class="metric"><div class="metric-label">Mitglieder</div><div class="metric-val">${totalMembers}</div></div>
+          <div class="metric"><div class="metric-label">Gespräche</div><div class="metric-val">${totalBilas}</div></div>
+          <div class="metric"><div class="metric-label">Ø BILA/MA</div><div class="metric-val">${avgBila}</div></div>
+          <div class="metric"><div class="metric-label">Aufgaben offen</div><div class="metric-val ${openTasks>5?'warn':''}">${openTasks}</div></div>
+          <div class="metric"><div class="metric-label">Aufgaben erledigt</div><div class="metric-val good">${doneTasks}</div></div>
+          <div class="metric"><div class="metric-label">Feedback</div><div class="metric-val">${totalFbs}</div></div>
+          <div class="metric"><div class="metric-label">Entwicklungsziele</div><div class="metric-val">${totalGoals} <span style="font-size:12px;color:var(--success)">/ ${achievedGoals} ✓</span></div></div>
+          <div class="metric"><div class="metric-label">Wiedervorlagen</div><div class="metric-val ${openFu?'warn':''}">${openFu} offen</div></div>
+          <div class="metric"><div class="metric-label">Datengrösse</div><div class="metric-val" style="font-size:14px">${dataSize} KB</div></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px">
+          Letzte Google Drive Synchronisation: <strong>${lastSync}</strong>
+        </div>
+      </div>
+
+      <!-- ══ ERWEITERT / ENTWICKLER ══ -->
+      <div class="settings-section-hd">🔧 Erweitert</div>
       <div class="card" style="margin-bottom:14px">
-        <div class="card-title">Demo-Daten</div>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Beispieldaten mit 2 Teams und 3 Mitgliedern laden.</p>
+        <div class="card-title" style="margin-bottom:4px">Demo-Daten</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Beispieldaten laden um die App auszuprobieren. Bestehende Daten bleiben erhalten.</p>
         <button class="btn btn-primary btn-sm" onclick="loadDemo()">Demo-Daten laden</button>
       </div>
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-title">Gefahrenzone</div>
-        <button class="btn btn-danger btn-sm" onclick="resetData()">Alle Daten löschen</button>
-        <p style="font-size:12px;color:var(--muted);margin-top:6px">Löscht alle Daten aus dem Browser. Nicht rückgängig machbar!</p>
+
+      <!-- ══ GEFAHRENZONE ══ -->
+      <div class="settings-section-hd" style="color:var(--danger)">⚠️ Gefahrenzone</div>
+      <div class="danger-zone" style="margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:8px">Alle Daten löschen</div>
+        <p style="font-size:13px;color:#7f1d1d;margin-bottom:12px;line-height:1.6">
+          Löscht <strong>alle Teams, Mitglieder, Gespräche, Aufgaben, Feedback und Ziele</strong> unwiderruflich aus dem Browser.<br>
+          Empfehlung: Zuerst ein Backup exportieren!
+        </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="localBackup()" style="background:#fff;border:1.5px solid #fca5a5;color:#dc2626;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">📥 Backup vor dem Löschen</button>
+          <button class="btn btn-danger btn-sm" onclick="resetData()">🗑 Alle Daten löschen…</button>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-title">Über Team Insight</div>
-        <p style="font-size:13px;color:var(--muted)">Version ${APP_VERSION} · Multi-Team · Google Drive + lokales Backup · Alle Daten in deiner eigenen Google Drive.</p>
+
+      <!-- ══ ÜBER ══ -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="section-head"><span class="card-title">Über Team Insight</span><span style="font-size:12px;color:var(--muted)">v${APP_VERSION}</span></div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          <strong style="color:var(--text)">Team Insight</strong> ist ein persönliches Scrum-Master-Tool für BILA-Verwaltung, Aufgaben, Feedback und Entwicklungsziele.<br>
+          Daten werden in deiner eigenen Google Drive gespeichert – privat und kostenlos.
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">📋 Was ist neu in v${APP_VERSION}:</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.9">
+            ✦ Globale Suche (Topbar + eigene Suchseite)<br>
+            ✦ Browser-Tab Favicon<br>
+            ✦ Dashboard-Widgets konfigurierbar<br>
+            ✦ BILA-Vorlagen mit Leitfragen<br>
+            ✦ Notification-Banner für überfällige Einträge<br>
+            ✦ BILA-Häufigkeit pro Mitglied<br>
+            ✦ Zeitachse / Timeline pro Mitglied<br>
+            ✦ Sprache DE/EN<br>
+            ✦ Gesprächsmappe PDF-Export pro Mitglied<br>
+            ✦ Wiedervorlagen / Follow-up Tracker<br>
+            ✦ Einstellungen neu strukturiert + Toast-Notifications<br>
+            ✦ Datenschutz-Modus<br>
+            ✦ Zweistufige Lösch-Bestätigung<br>
+            ✦ Standard-Einstellungen für neue Mitglieder
+          </div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">
+          Google Drive Sync · localStorage Fallback · Single-File App · Kein Server nötig
+        </div>
       </div>
+
     </div>
   `;
 }
+
 
 function saveClientId(){
   const id = document.getElementById('s-clientid').value.trim();
@@ -2992,9 +3324,33 @@ function saveClientId(){
   state.settings.clientId = id;
   localStorage.setItem('ti_gclient_id', id);
   save();
-  alert('Client ID gespeichert. Seite wird neu geladen…');
-  location.reload();
+  showToast('✓ Client ID gespeichert – Seite lädt neu…');
+  setTimeout(()=>location.reload(), 1500);
 }
+
+function saveDefaultBilaFreq(){
+  const v = parseInt(document.getElementById('s-default-bilafreq')?.value)||4;
+  if(!state.settings) state.settings={};
+  state.settings.defaultBilaFreq = v;
+  save(); showToast('✓ Standard BILA-Häufigkeit gespeichert');
+}
+function saveDefaultPrio(){
+  const v = document.getElementById('s-default-prio')?.value||'Mittel';
+  if(!state.settings) state.settings={};
+  state.settings.defaultPrio = v;
+  save(); showToast('✓ Standard-Priorität gespeichert');
+}
+function savePrivacyMode(){
+  const v = document.getElementById('s-privacy')?.checked||false;
+  if(!state.settings) state.settings={};
+  state.settings.privacyMode = v;
+  save(); showToast(v ? '🔒 Datenschutz-Modus aktiv' : '🔓 Datenschutz-Modus deaktiviert');
+}
+function saveBackupName(){
+  const v = document.getElementById('s-backupname')?.value.trim();
+  if(v){ if(!state.settings)state.settings={}; state.settings.backupFilename=v; save(); }
+}
+
 function saveAutoBackup(){
   const v = document.getElementById('s-autobackup')?.checked||false;
   if(!state.settings) state.settings={};
@@ -3008,7 +3364,7 @@ function toggleModule(key, enabled) {
   state.modules[key] = enabled;
   save();
   renderSidebar();
-  // Re-render dashboard buttons if we're on dashboard
+  showToast((enabled ? '✓ ' : '✕ ') + key + (enabled ? ' aktiviert' : ' deaktiviert'));
   if (currentView === 'dashboard') renderDashboard();
 }
 
@@ -3034,6 +3390,7 @@ function exportDataManual() {
   a.download = filename;
   a.click();
   setSyncStatus('ok', 'Gesichert');
+  showToast('✓ Backup gespeichert: ' + filename);
 }
 
 function importData(evt) {
@@ -3057,13 +3414,38 @@ function importData(evt) {
 }
 
 function resetData() {
-  if (!confirm('ACHTUNG: Alle Daten wirklich löschen?')) return;
-  state = {teams:[],members:[],bilas:[],tasks:[],aiHistory:[],backup:{localEnabled:false,gistEnabled:false,gistToken:'',gistId:'',onedrive:false,gdrive:false,synology:false,synologyUrl:'',synologyUser:'',synologyPass:'',synologyPath:'/teaminsight/backup.json'},nextTeamId:1,nextMemberId:1,nextBilaId:1,nextTaskId:1};
+  const modal = document.createElement('div');
+  modal.className = 'overlay open';
+  modal.id = 'ov-reset';
+  modal.innerHTML = `<div class="modal" style="max-width:420px">
+    <div class="modal-header"><span class="modal-title" style="color:var(--danger)">⚠️ Alle Daten löschen</span><button class="modal-close" onclick="document.getElementById('ov-reset').remove()">&#215;</button></div>
+    <div style="background:#fff5f5;border:1px solid #fca5a5;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;line-height:1.6">
+      Diese Aktion löscht <strong>alle Teams, Mitglieder, Gespräche, Aufgaben, Feedback und Entwicklungsziele</strong> unwiderruflich aus dem Browser.<br><br>
+      <strong>Empfehlung:</strong> Zuerst ein Backup exportieren!
+    </div>
+    <div class="form-row">
+      <label class="fl" style="color:var(--danger)">Zur Bestätigung «LÖSCHEN» eintippen:</label>
+      <input type="text" id="reset-confirm-input" placeholder="LÖSCHEN" style="border-color:var(--danger)">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-danger" onclick="confirmReset()">Alle Daten löschen</button>
+      <button class="btn" onclick="document.getElementById('ov-reset').remove()">Abbrechen</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+function confirmReset(){
+  const val = document.getElementById('reset-confirm-input')?.value||'';
+  if(val.trim() !== 'LÖSCHEN'){ showToast('Bitte «LÖSCHEN» eintippen','err'); return; }
+  state = { teams:[], members:[], bilas:[], tasks:[], aiHistory:[], followups:[],
+    modules:{tasks:true,bilas:true,feedback:true,devgoals:true,ai:true},
+    settings:{ clientId: state.settings?.clientId||'', localAutoBackup:false, backupFilename:'TeamInsight-Backup', lang:'de', dashboardWidgets:WIDGET_DEFS.map(w=>w.id) },
+    nextTeamId:1, nextMemberId:1, nextBilaId:1, nextTaskId:1 };
   currentTeamId = null;
-  save();
-  renderTeamSelector();
-  renderSidebar();
-  showView('dashboard');
+  localStorage.setItem('ti_state', JSON.stringify(state));
+  document.getElementById('ov-reset')?.remove();
+  showToast('Alle Daten gelöscht','ok');
+  renderTeamSelector(); renderSidebar(); showView('dashboard');
 }
 
 function loadDemo() {
@@ -3312,6 +3694,662 @@ function closeAllOverlays() {
 // to prevent accidental data loss.
 
 // ============================================================
+// GLOBAL SEARCH (Option A: dropdown + Option B: full page)
+// ============================================================
+let _searchOpen = false;
+
+function toggleSearch() {
+  const wrap = document.getElementById('search-input-wrap');
+  const dd = document.getElementById('search-dropdown');
+  _searchOpen = !_searchOpen;
+  wrap.classList.toggle('open', _searchOpen);
+  dd.classList.remove('open');
+  if (_searchOpen) {
+    setTimeout(() => document.getElementById('search-input').focus(), 250);
+  } else {
+    document.getElementById('search-input').value = '';
+    dd.innerHTML = '';
+  }
+}
+
+function handleSearchKey(e) {
+  const items = document.querySelectorAll('#search-dropdown .sr-item');
+  let focused = document.querySelector('#search-dropdown .sr-item.focused');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const next = focused ? focused.nextElementSibling : items[0];
+    if (focused) focused.classList.remove('focused');
+    if (next && next.classList.contains('sr-item')) { next.classList.add('focused'); next.scrollIntoView({block:'nearest'}); }
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    const prev = focused ? focused.previousElementSibling : null;
+    if (focused) focused.classList.remove('focused');
+    if (prev && prev.classList.contains('sr-item')) { prev.classList.add('focused'); prev.scrollIntoView({block:'nearest'}); }
+  } else if (e.key === 'Enter') {
+    if (focused) { focused.click(); return; }
+    const q = document.getElementById('search-input').value.trim();
+    if (q) { toggleSearch(); showView('search'); setTimeout(() => doFullSearch(q), 50); }
+  } else if (e.key === 'Escape') {
+    toggleSearch();
+  }
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('search-wrap');
+  if (wrap && !wrap.contains(e.target) && _searchOpen) toggleSearch();
+});
+
+function hl(text, q) {
+  if (!q || !text) return text || '';
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(text).replace(new RegExp('(' + escaped + ')', 'gi'), '<em class="hl">$1</em>');
+}
+
+function buildSearchResults(q) {
+  if (!q || q.length < 2) return [];
+  const lq = q.toLowerCase();
+  const results = [];
+
+  // Members
+  state.members.forEach(m => {
+    const score = (m.name||'').toLowerCase().includes(lq) ? 3 :
+                  (m.role||'').toLowerCase().includes(lq) ? 2 :
+                  (m.email||'').toLowerCase().includes(lq) ? 1 : 0;
+    if (score) results.push({type:'member', score, id:m.id,
+      title: m.name, sub: m.role||'', icon:'👤',
+      action: () => { toggleSearch(); openMember(m.id); }});
+  });
+
+  // BILAs
+  state.bilas.forEach(b => {
+    const m = getMember(b.memberId);
+    const text = [(b.subject||''), (b.notes||''), (b.agreements||''), (b.risks||''), (b.followUp||''), (b.tags||[]).join(' ')].join(' ').toLowerCase();
+    if (text.includes(lq)) {
+      const preview = [(b.subject||''),(b.notes||'')].filter(Boolean).join(' · ').slice(0,70);
+      results.push({type:'bila', score:2, id:b.id,
+        title: (b.subject||'Ohne Betreff') + ' – ' + (m?m.name:''),
+        sub: fmtDate(b.date) + ' · ' + (b.type||'BILA') + ' · ' + preview,
+        icon:'📅',
+        action: () => { toggleSearch(); openBilaDetail(b.id); }});
+    }
+  });
+
+  // Tasks
+  state.tasks.forEach(t => {
+    const m = getMember(t.assignee);
+    const text = [(t.title||''),(t.desc||'')].join(' ').toLowerCase();
+    if (text.includes(lq)) results.push({type:'task', score:2, id:t.id,
+      title: t.title, sub: (m?m.name+' · ':'')+t.priority+(t.due?' · ⏰ '+fmtDate(t.due):''),
+      icon:'✅',
+      action: () => { toggleSearch(); showView('tasks'); setTimeout(()=>{
+        document.getElementById('tf-person') && (document.getElementById('tf-person').value = '');
+        applyTaskFilters();
+      },100); }});
+  });
+
+  // Feedbacks
+  (state.feedbacks||[]).forEach(f => {
+    const g = getMember(f.giverId), r = getMember(f.receiverId);
+    const text = [(f.subject||''),(f.content||''),(f.strengths||''),(f.improve||'')].join(' ').toLowerCase();
+    if (text.includes(lq)) results.push({type:'feedback', score:2, id:f.id,
+      title: f.subject||'Ohne Betreff',
+      sub: (g?g.name:'Extern')+' → '+(r?r.name:'?')+' · '+fmtDate(f.date),
+      icon:'💬',
+      action: () => { toggleSearch(); openFeedbackModal(f.id); }});
+  });
+
+  // Dev Goals
+  state.members.forEach(m => {
+    (m.devGoals||[]).forEach(g => {
+      const text = [(g.goal||''),(g.description||''),(g.notes||'')].join(' ').toLowerCase();
+      if (text.includes(lq)) results.push({type:'devgoal', score:2, id:g.id,
+        title: g.goal, sub: m.name+(g.category?' · '+g.category:'')+(g.endDate?' · ⏰ '+fmtDate(g.endDate):''),
+        icon:'🎯',
+        action: () => { toggleSearch(); openMember(m.id); setTimeout(()=>setMemberTab('dev'),100); }});
+    });
+  });
+
+  return results.sort((a,b) => b.score - a.score).slice(0, 20);
+}
+
+function globalSearch(q) {
+  const dd = document.getElementById('search-dropdown');
+  if (!q || q.length < 2) { dd.classList.remove('open'); dd.innerHTML = ''; return; }
+
+  const results = buildSearchResults(q);
+  if (!results.length) {
+    dd.innerHTML = '<div class="sr-empty">Keine Ergebnisse für «' + q + '»</div>';
+    dd.classList.add('open');
+    return;
+  }
+
+  // Group by type
+  const groups = {member:'👤 Mitglieder', bila:'📅 Gespräche', task:'✅ Aufgaben', feedback:'💬 Feedback', devgoal:'🎯 Entwicklungsziele'};
+  const grouped = {};
+  results.forEach(r => { if (!grouped[r.type]) grouped[r.type] = []; grouped[r.type].push(r); });
+
+  let html = '';
+  Object.entries(groups).forEach(([key, label]) => {
+    if (!grouped[key]) return;
+    html += '<div class="sr-section">' + label + '</div>';
+    grouped[key].slice(0,4).forEach(r => {
+      html += '<div class="sr-item" onclick="('+r.action.toString()+')()">'
+        + '<div class="sr-item-icon">' + r.icon + '</div>'
+        + '<div class="sr-item-main">'
+        + '<div class="sr-item-title">' + hl(r.title, q) + '</div>'
+        + '<div class="sr-item-sub">' + r.sub + '</div>'
+        + '</div></div>';
+    });
+  });
+
+  html += '<div class="sr-footer" onclick="toggleSearch();showView(\'search\');setTimeout(()=>doFullSearch(\'' + q.replace(/'/g,"\\'") + '\'),50)">🔍 Alle Ergebnisse anzeigen (' + results.length + ')</div>';
+  dd.innerHTML = html;
+  dd.classList.add('open');
+}
+
+// ── Option B: Full search page ──────────────────────────────────
+function renderSearchView() {
+  document.getElementById('topbar-actions').innerHTML = '<span id="sync-status"></span>';
+  document.getElementById('content').innerHTML = `
+    <div style="max-width:700px">
+      <div style="background:#fff;border:1.5px solid var(--accent);border-radius:12px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(24,95,165,.1)">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5" stroke="var(--accent)" stroke-width="1.5"/><path d="M12 12l4 4" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" id="search-page-input" placeholder="Über alle Bereiche suchen… (Mitglieder, Gespräche, Aufgaben, Feedback, Ziele)" style="border:none;outline:none;flex:1;font-size:14px;color:var(--text);background:transparent" oninput="doFullSearch(this.value)" autofocus>
+        <button onclick="document.getElementById('search-page-input').value='';doFullSearch('')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:0 4px">✕</button>
+      </div>
+      <div id="search-page-results"><div class="empty" style="padding:40px 0">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin:0 auto 12px;display:block"><circle cx="17" cy="17" r="11" stroke="#d1d5db" stroke-width="2"/><path d="M26 26l8 8" stroke="#d1d5db" stroke-width="2" stroke-linecap="round"/></svg>
+        Suchbegriff eingeben um alle Bereiche zu durchsuchen
+      </div></div>
+    </div>`;
+}
+
+function doFullSearch(q) {
+  const cont = document.getElementById('search-page-results');
+  if (!cont) return;
+  if (!q || q.length < 2) {
+    cont.innerHTML = '<div class="empty" style="padding:40px 0">Suchbegriff eingeben um alle Bereiche zu durchsuchen</div>';
+    return;
+  }
+
+  const results = buildSearchResults(q);
+
+  if (!results.length) {
+    cont.innerHTML = '<div class="empty" style="padding:40px 0">Keine Ergebnisse für «' + q + '»</div>';
+    return;
+  }
+
+  const groups = {member:'👤 Mitglieder', bila:'📅 Gespräche', task:'✅ Aufgaben', feedback:'💬 Feedback', devgoal:'🎯 Entwicklungsziele'};
+  const grouped = {};
+  results.forEach(r => { if (!grouped[r.type]) grouped[r.type] = []; grouped[r.type].push(r); });
+
+  let html = '<div style="font-size:12px;color:var(--muted);margin-bottom:14px">' + results.length + ' Ergebnis' + (results.length!==1?'se':'') + ' für «' + q + '»</div>';
+
+  Object.entries(groups).forEach(([key, label]) => {
+    if (!grouped[key]) return;
+    html += '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 8px">' + label + ' (' + grouped[key].length + ')</div>';
+    grouped[key].forEach(r => {
+      html += '<div class="sr-item" style="background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;padding:10px 14px" onclick="('+r.action.toString()+')()">'
+        + '<div class="sr-item-icon" style="font-size:18px">' + r.icon + '</div>'
+        + '<div class="sr-item-main">'
+        + '<div class="sr-item-title" style="font-size:14px">' + hl(r.title, q) + '</div>'
+        + '<div class="sr-item-sub" style="font-size:12px;margin-top:3px">' + r.sub + '</div>'
+        + '</div>'
+        + '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;margin-top:3px"><path d="M5 3l4 4-4 4" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        + '</div>';
+    });
+  });
+
+  cont.innerHTML = html;
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  FEATURE 1 – Dashboard Widget Config                        ║
+// ╚══════════════════════════════════════════════════════════════╝
+const WIDGET_DEFS = [
+  {id:'tasks',   icon:'✅', label:'Aufgaben'},
+  {id:'bilas',   icon:'📅', label:'Gespräche'},
+  {id:'devgoals',icon:'🎯', label:'Entwicklungsziele'},
+  {id:'risks',   icon:'⚠️', label:'Risiken & Trends'},
+  {id:'team',    icon:'👥', label:'Team-Übersicht'},
+  {id:'followups',icon:'🔁',label:'Wiedervorlagen'},
+];
+function getWidgetOrder(){
+  return state.settings.dashboardWidgets || WIDGET_DEFS.map(w=>w.id);
+}
+function openWidgetConfig(){
+  const order = getWidgetOrder();
+  const html = WIDGET_DEFS.map(w=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f0f2f5">
+      <input type="checkbox" id="dw-${w.id}" ${order.includes(w.id)?'checked':''} style="width:16px;height:16px;cursor:pointer">
+      <span style="font-size:16px">${w.icon}</span>
+      <label for="dw-${w.id}" style="font-size:13px;flex:1;cursor:pointer">${w.label}</label>
+    </div>`).join('');
+  const modal = document.createElement('div');
+  modal.className = 'overlay open';
+  modal.id = 'ov-widgets';
+  modal.innerHTML = `<div class="modal" style="max-width:400px">
+    <div class="modal-header"><span class="modal-title">Dashboard anpassen</span><button class="modal-close" onclick="document.getElementById('ov-widgets').remove()">&#215;</button></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Wähle welche Karten auf dem Dashboard erscheinen sollen.</p>
+    ${html}
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="saveWidgetConfig()">Speichern</button>
+      <button class="btn" onclick="document.getElementById('ov-widgets').remove()">Abbrechen</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+function saveWidgetConfig(){
+  const active = WIDGET_DEFS.filter(w=>document.getElementById('dw-'+w.id)?.checked).map(w=>w.id);
+  if(!state.settings) state.settings={};
+  state.settings.dashboardWidgets = active;
+  save();
+  showToast('✓ Dashboard gespeichert');
+  document.getElementById('ov-widgets')?.remove();
+  renderDashboard();
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  FEATURE 2 – BILA Templates                                  ║
+// ╚══════════════════════════════════════════════════════════════╝
+const BILA_TEMPLATES = [
+  { id:'regular', label:'Reguläres BILA', icon:'📅', type:'Reguläres BILA',
+    subject:'Reguläres BILA',
+    notes:'**Wie läuft es dir?**\n\n**Was beschäftigt dich gerade?**\n\n**Was war diese Woche ein Highlight?**\n\n**Wo brauchst du Unterstützung?**',
+    agreements:'', risks:'', followUp:'' },
+  { id:'probezeit', label:'Probezeitgespräch', icon:'🆕', type:'Probezeitgespräch',
+    subject:'Probezeitgespräch',
+    notes:'**Erste Eindrücke – was gefällt dir?**\n\n**Was ist noch unklar oder herausfordernd?**\n\n**Wie ist die Einarbeitung gelaufen?**\n\n**Was brauchst du noch?**',
+    agreements:'Einarbeitung abschließen bis:', risks:'', followUp:'Check-in in 2 Wochen' },
+  { id:'jahres', label:'Jahresgespräch', icon:'📆', type:'Jahresgespräch',
+    subject:'Jahresgespräch',
+    notes:'**Rückblick – was lief gut?**\n\n**Was hätte besser laufen können?**\n\n**Highlights des Jahres?**\n\n**Entwicklung und Karriereziele für nächstes Jahr?**',
+    agreements:'Ziele für nächstes Jahr festhalten', risks:'', followUp:'Ziele in 3 Monaten reviewen' },
+  { id:'entwicklung', label:'Entwicklungsgespräch', icon:'🎯', type:'Entwicklungsgespräch',
+    subject:'Entwicklungsgespräch',
+    notes:'**Wo möchtest du dich weiterentwickeln?**\n\n**Was sind deine längerfristigen Karriereziele?**\n\n**Welche Skills möchtest du aufbauen?**\n\n**Was benötigst du dafür von mir / dem Unternehmen?**',
+    agreements:'Entwicklungsplan erstellen', risks:'', followUp:'Review in 6 Wochen' },
+  { id:'coaching', label:'Coaching-Session', icon:'💡', type:'Coaching-Session',
+    subject:'Coaching-Session',
+    notes:'**Was ist das Thema heute?**\n\n**Wo stehst du gerade?**\n\n**Was wäre ein gutes Ergebnis für heute?**\n\n**Was nimmst du mit?**',
+    agreements:'', risks:'', followUp:'' },
+];
+function applyBilaTemplate(id){
+  const t = BILA_TEMPLATES.find(t=>t.id===id);
+  if(!t) return;
+  document.querySelectorAll('.tpl-card').forEach(el=>el.classList.toggle('selected', el.dataset.tpl===id));
+  if(document.getElementById('fm-type')) document.getElementById('fm-type').value = t.type;
+  if(document.getElementById('fm-subject')) document.getElementById('fm-subject').value = t.subject;
+  if(document.getElementById('fm-notes')) document.getElementById('fm-notes').value = t.notes;
+  if(document.getElementById('fm-agreements')) document.getElementById('fm-agreements').value = t.agreements;
+  if(document.getElementById('fm-followup')) document.getElementById('fm-followup').value = t.followUp;
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  FEATURE 3 – Notification Banner                             ║
+// ╚══════════════════════════════════════════════════════════════╝
+let _notifDismissed = false;
+function renderNotifBanner(){
+  const existing = document.getElementById('notif-banner');
+  if(existing) existing.remove();
+  if(_notifDismissed) return;
+  const members = activeTeamMembers();
+  const tasks = activeTeamTasks();
+  const items = [];
+  // Overdue tasks
+  const od = tasks.filter(t=>t.status!=='Erledigt'&&isOverdue(t.due));
+  if(od.length) items.push({cls:'red', icon:'🔴', text:`${od.length} überfällige Aufgabe${od.length!==1?'n':''}`, action:"showView('tasks')"});
+  // BILA overdue by frequency
+  members.forEach(m=>{
+    const freq = m.bilaFreqWeeks||4;
+    const last = [...state.bilas.filter(b=>b.memberId===m.id)].sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const daysSince = last ? Math.round((new Date()-new Date(last.date))/864e5) : 999;
+    if(daysSince > freq*7) items.push({cls:'amber', icon:'📅', text:`${m.name}: kein BILA seit ${daysSince}T`, action:`openMember(${m.id})`});
+  });
+  // Followups due
+  const fuDue = (state.followups||[]).filter(fu=>!fu.done&&fu.dueDate&&fu.dueDate<=today());
+  if(fuDue.length) items.push({cls:'amber', icon:'🔁', text:`${fuDue.length} Wiedervorlage${fuDue.length!==1?'n':''}`, action:"showView('followups')"});
+  if(!items.length) return;
+  const banner = document.createElement('div');
+  banner.id = 'notif-banner';
+  banner.innerHTML = items.slice(0,5).map(it=>`<div class="nb-item ${it.cls}" onclick="${it.action}">${it.icon} ${it.text}</div>`).join('')
+    + `<div class="nb-close" onclick="_notifDismissed=true;document.getElementById('notif-banner').remove()" title="Schließen">✕</div>`;
+  const content = document.getElementById('content');
+  if(content && content.parentNode) content.parentNode.insertBefore(banner, content);
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  FEATURE 4 – BILA Frequency per Member                       ║
+// ╚══════════════════════════════════════════════════════════════╝
+function bilaFreqStatus(memberId){
+  const m = getMember(memberId);
+  if(!m) return null;
+  const freq = m.bilaFreqWeeks||4;
+  const last = [...state.bilas.filter(b=>b.memberId===memberId)].sort((a,b)=>b.date.localeCompare(a.date))[0];
+  const daysSince = last ? Math.round((new Date()-new Date(last.date))/864e5) : 999;
+  const daysLimit = freq*7;
+  const pct = Math.min(daysSince/daysLimit,1);
+  const cls = pct<0.75?'freq-ok':pct<1?'freq-warn':'freq-late';
+  const icon = pct<0.75?'🟢':pct<1?'🟡':'🔴';
+  return {cls, icon, daysSince, freq, last:last?fmtDate(last.date):'–', pct};
+}
+function bilaFreqBadgeHTML(memberId){
+  const s = bilaFreqStatus(memberId);
+  if(!s) return '';
+  return `<span class="freq-badge ${s.cls}">${s.icon} ${s.daysSince<999?s.daysSince+'T':'kein'} / ${s.freq*7}T</span>`;
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  FEATURE 5 – Timeline View (member tab)                      ║
+// ╚══════════════════════════════════════════════════════════════╝
+function renderTimeline(memberId){
+  const m = getMember(memberId);
+  if(!m) return '<div class="empty">Kein Mitglied</div>';
+  const events = [];
+  // BILAs
+  state.bilas.filter(b=>b.memberId===memberId).forEach(b=>events.push({
+    date:b.date, type:'bila', icon:'📅', title:b.subject||'Gespräch', sub:b.type+'  ·  '+fmtDate(b.date),
+    action:`openBilaDetail(${b.id})`
+  }));
+  // Tasks
+  state.tasks.filter(t=>t.assignee===memberId).forEach(t=>events.push({
+    date:t.due||t.created||today(), type:'task', icon:'✅', title:t.title,
+    sub:(t.status||'Offen')+' · '+t.priority+(t.due?' · ⏰ '+fmtDate(t.due):''),
+    action:`editTask(${t.id})`
+  }));
+  // Feedback
+  (state.feedbacks||[]).filter(f=>f.receiverId===memberId||f.giverId===memberId).forEach(f=>{
+    const other = f.receiverId===memberId ? getMember(f.giverId) : getMember(f.receiverId);
+    events.push({date:f.date, type:'feedback', icon:'💬', title:f.subject||'Feedback',
+      sub:(f.receiverId===memberId?'von ':'an ')+(other?other.name:'Extern')+' · '+fmtDate(f.date),
+      action:`openFeedbackModal('${f.id}')`
+    });
+  });
+  // Dev Goals
+  (m.devGoals||[]).forEach(g=>events.push({
+    date:g.startDate||g.created||today(), type:'goal', icon:'🎯', title:g.goal,
+    sub:(g.category||'')+' · '+(g.achieved?'✓ Erreicht':'Offen')+(g.endDate?' · ⏰ '+fmtDate(g.endDate):''),
+    action:`openDevGoalModal(${memberId},'${g.id}')`
+  }));
+  // Followups
+  (state.followups||[]).filter(fu=>fu.memberId===memberId).forEach(fu=>events.push({
+    date:fu.dueDate||today(), type:'followup', icon:'🔁', title:fu.text||'Wiedervorlage',
+    sub:fmtDate(fu.dueDate)+(fu.done?' · ✓ Erledigt':''),
+    action:'showView(\'followups\')'
+  }));
+  if(!events.length) return '<div class="empty" style="padding:30px 0">Noch keine Ereignisse</div>';
+  events.sort((a,b)=>b.date.localeCompare(a.date));
+  return `<div style="margin-bottom:10px;font-size:12px;color:var(--muted)">${events.length} Ereignisse</div>
+  <div class="timeline">
+  ${events.map(ev=>`<div class="tl-item">
+    <div class="tl-dot ${ev.type}"></div>
+    <div class="tl-card" onclick="${ev.action}">
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">${ev.icon}</span><span style="font-size:13px;font-weight:500">${ev.title}</span></div>
+      <div class="tl-meta">${ev.sub}</div>
+    </div>
+  </div>`).join('')}
+  </div>`;
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  FEATURE 6 – Language Toggle (DE/EN)                         ║
+// ╚══════════════════════════════════════════════════════════════╝
+const I18N = {
+  de: { dashboard:'Dashboard', tasks:'Aufgaben', bilas:'Gespräche', feedback:'Feedback',
+        devgoals:'Entwicklungsziele', ai:'KI-Assistent', settings:'Einstellungen',
+        search:'Suche', followups:'Wiedervorlagen',
+        addConversation:'+ Gespräch', addTask:'+ Aufgabe', addGoal:'+ Ziel', addFeedback:'+ Feedback',
+        open:'Offen', done:'Erledigt', members:'Mitglieder', overdue:'Überfällig' },
+  en: { dashboard:'Dashboard', tasks:'Tasks', bilas:'Conversations', feedback:'Feedback',
+        devgoals:'Development Goals', ai:'AI Assistant', settings:'Settings',
+        search:'Search', followups:'Follow-ups',
+        addConversation:'+ Conversation', addTask:'+ Task', addGoal:'+ Goal', addFeedback:'+ Feedback',
+        open:'Open', done:'Done', members:'Members', overdue:'Overdue' }
+};
+function t(key){ const lang=(state.settings&&state.settings.lang)||'de'; return (I18N[lang]||I18N.de)[key]||key; }
+function setLang(lang){ if(!state.settings)state.settings={}; state.settings.lang=lang; save(); showToast('✓ Sprache geändert'); renderSidebar(); renderDashboard(); if(currentView==='settings')renderSettingsView(); }
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  FEATURE 7 – Member PDF Export (Gesprächsmappe)              ║
+// ╚══════════════════════════════════════════════════════════════╝
+function exportMemberPDF(memberId){
+  const m = getMember(memberId);
+  if(!m){ alert('Mitglied nicht gefunden'); return; }
+  const bilas = state.bilas.filter(b=>b.memberId===memberId).sort((a,b)=>b.date.localeCompare(a.date));
+  const tasks = state.tasks.filter(t=>t.assignee===memberId);
+  const fbs = (state.feedbacks||[]).filter(f=>f.receiverId===memberId||f.giverId===memberId);
+  const goals = m.devGoals||[];
+  const exportDate = new Date().toLocaleDateString('de-CH');
+  const giHTML = bilas.map(b=>`<tr style="page-break-inside:avoid">
+    <td style="padding:6px;border:1px solid #e5e7eb;white-space:nowrap">${fmtDate(b.date)}</td>
+    <td style="padding:6px;border:1px solid #e5e7eb">${b.type||'BILA'}</td>
+    <td style="padding:6px;border:1px solid #e5e7eb;font-weight:500">${b.subject||'–'}</td>
+    <td style="padding:6px;border:1px solid #e5e7eb;white-space:pre-wrap;max-width:200px;font-size:10px">${(b.notes||'').slice(0,300)}</td>
+    <td style="padding:6px;border:1px solid #e5e7eb;font-size:10px">${b.agreements||'–'}</td>
+    <td style="padding:6px;border:1px solid #e5e7eb;font-size:10px;color:#dc2626">${b.risks||'–'}</td>
+  </tr>`).join('');
+  const taskHTML = tasks.map(t=>`<tr>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${t.title}</td>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${t.priority}</td>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${t.status||'Offen'}</td>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${t.due?fmtDate(t.due):'–'}</td>
+  </tr>`).join('');
+  const goalHTML = goals.map(g=>`<tr>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${g.goal}</td>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${g.category||'–'}</td>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${g.achieved?'✓ Erreicht':'Offen'}</td>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${g.endDate?fmtDate(g.endDate):'–'}</td>
+  </tr>`).join('');
+  const fbHTML = fbs.map(f=>{const g2=getMember(f.giverId),r=getMember(f.receiverId);return`<tr>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${fmtDate(f.date)}</td>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${g2?g2.name:'Extern'} → ${r?r.name:'?'}</td>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb">${f.subject||'–'}</td>
+    <td style="padding:5px 8px;border:1px solid #e5e7eb;font-size:10px">${(f.content||'').slice(0,150)}</td>
+  </tr>`;}).join('');
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Gesprächsmappe – ${m.name}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;font-size:11px;color:#1a1d23;padding:24px}
+    h1{font-size:20px;font-weight:700;margin-bottom:4px}
+    .meta{color:#6b7280;font-size:11px;margin-bottom:20px}
+    h2{font-size:13px;font-weight:700;margin:20px 0 8px;padding:4px 0;border-bottom:2px solid #185FA5;color:#185FA5}
+    table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px}
+    th{background:#185FA5;color:#fff;padding:6px 8px;text-align:left;font-size:9px}
+    td{vertical-align:top}
+    tr:nth-child(even) td{background:#f9fafb}
+    .chip{display:inline-block;background:#E6F1FB;color:#185FA5;padding:2px 8px;border-radius:20px;font-size:9px;margin:2px}
+    @media print{body{padding:0}h2{break-before:auto}}
+  </style></head><body>
+  <h1>${m.name}</h1>
+  <div class="meta">${m.role||'–'} ${m.since?'· Dabei seit '+fmtDate(m.since):''} · Exportiert am ${exportDate}</div>
+  ${m.skills||m.strengths?`<div style="margin-bottom:16px">${m.skills?`<strong>Skills:</strong> ${m.skills} `:''}${m.strengths?`<strong>Stärken:</strong> ${m.strengths}`:''}${m.career?`<br><strong>Karriereziele:</strong> ${m.career}`:''}</div>`:''}
+  ${bilas.length?`<h2>Gespräche (${bilas.length})</h2><table><thead><tr><th>Datum</th><th>Typ</th><th>Betreff</th><th>Notizen</th><th>Vereinbarungen</th><th>Risiken</th></tr></thead><tbody>${giHTML}</tbody></table>`:''}
+  ${tasks.length?`<h2>Aufgaben (${tasks.length})</h2><table><thead><tr><th>Aufgabe</th><th>Priorität</th><th>Status</th><th>Fällig</th></tr></thead><tbody>${taskHTML}</tbody></table>`:''}
+  ${goals.length?`<h2>Entwicklungsziele (${goals.length})</h2><table><thead><tr><th>Ziel</th><th>Kategorie</th><th>Status</th><th>Zieldatum</th></tr></thead><tbody>${goalHTML}</tbody></table>`:''}
+  ${fbs.length?`<h2>Feedback (${fbs.length})</h2><table><thead><tr><th>Datum</th><th>Von → An</th><th>Betreff</th><th>Inhalt</th></tr></thead><tbody>${fbHTML}</tbody></table>`:''}
+  <script>window.onload=()=>window.print()<\/script>
+  </body></html>`;
+  const w = window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  FEATURE 8 – Follow-up / Wiedervorlage Tracker               ║
+// ╚══════════════════════════════════════════════════════════════╝
+function openFollowupModal(bilaId, memberId, editId){
+  const fu = editId ? (state.followups||[]).find(f=>f.id===editId) : null;
+  const modal = document.createElement('div');
+  modal.className = 'overlay open';
+  modal.id = 'ov-followup';
+  const members = state.members;
+  modal.innerHTML = `<div class="modal" style="max-width:480px">
+    <div class="modal-header"><span class="modal-title">${fu?'Wiedervorlage bearbeiten':'Neue Wiedervorlage'}</span><button class="modal-close" onclick="document.getElementById('ov-followup').remove()">&#215;</button></div>
+    <div class="form-row"><label class="fl">Thema / Notiz *</label><textarea id="fu-text" rows="3" placeholder="Was soll erinnert werden?">${fu?fu.text||'':''}</textarea></div>
+    <div class="form-grid2">
+      <div class="form-row"><label class="fl">Fälligkeitsdatum</label><input type="date" id="fu-date" value="${fu?fu.dueDate:today()}"></div>
+      <div class="form-row"><label class="fl">Mitglied</label><select id="fu-member"><option value="">Kein</option>${members.map(m=>`<option value="${m.id}" ${(fu&&fu.memberId===m.id)||memberId===m.id?'selected':''}>${m.name}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-row"><label class="fl">Verknüpft mit Gespräch</label><select id="fu-bila"><option value="">Keins</option>${state.bilas.map(b=>{const bm=getMember(b.memberId);return`<option value="${b.id}" ${(fu&&fu.bilaId===b.id)||bilaId===b.id?'selected':''}>${bm?bm.name+' – ':''} ${fmtDate(b.date)} ${b.subject?'('+b.subject+')':''}</option>`;}).join('')}</select></div>
+    <div style="display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+      <button class="btn btn-primary" onclick="saveFollowup('${editId||''}')">Speichern</button>
+      ${fu?`<button class="btn btn-danger btn-sm" onclick="deleteFollowup('${editId}')">Löschen</button>`:''}
+      <button class="btn" onclick="document.getElementById('ov-followup').remove()">Abbrechen</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+function saveFollowup(editId){
+  if(!state.followups) state.followups=[];
+  const text = document.getElementById('fu-text').value.trim();
+  if(!text){ alert('Bitte Thema eingeben'); return; }
+  const data = { text, dueDate: document.getElementById('fu-date').value,
+    memberId: parseInt(document.getElementById('fu-member').value)||null,
+    bilaId: parseInt(document.getElementById('fu-bila').value)||null,
+    done: false, created: today() };
+  if(editId){ const ex=(state.followups).find(f=>f.id===editId); if(ex) Object.assign(ex,data); }
+  else { state.followups.push({id:'fu'+Date.now(),...data}); }
+  save();
+  document.getElementById('ov-followup')?.remove();
+  renderNotifBanner();
+  if(currentView==='followups') renderFollowupsView();
+}
+function deleteFollowup(id){ if(!confirm('Wiedervorlage löschen?'))return; state.followups=(state.followups||[]).filter(f=>f.id!==id); save(); document.getElementById('ov-followup')?.remove(); if(currentView==='followups')renderFollowupsView(); renderNotifBanner(); }
+function toggleFollowupDone(id){ const fu=(state.followups||[]).find(f=>f.id===id); if(fu){fu.done=!fu.done;save();renderFollowupsView();renderNotifBanner();} }
+
+function renderFollowupsView(){
+  document.getElementById('topbar-actions').innerHTML=`<span id="sync-status"></span><button class="btn btn-primary btn-sm" onclick="openFollowupModal()">+ Wiedervorlage</button>`;
+  const fus = state.followups||[];
+  const open = fus.filter(f=>!f.done).sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||''));
+  const done = fus.filter(f=>f.done);
+  const today_ = today();
+  document.getElementById('content').innerHTML = `
+    <div class="metric-grid" style="margin-bottom:14px">
+      <div class="metric"><div class="metric-label">Gesamt</div><div class="metric-val">${fus.length}</div></div>
+      <div class="metric"><div class="metric-label">Offen</div><div class="metric-val ${open.length?'warn':''}">${open.length}</div></div>
+      <div class="metric"><div class="metric-label">Überfällig</div><div class="metric-val ${open.filter(f=>f.dueDate&&f.dueDate<today_).length?'bad':''}">${open.filter(f=>f.dueDate&&f.dueDate<today_).length}</div></div>
+      <div class="metric"><div class="metric-label">Erledigt</div><div class="metric-val good">${done.length}</div></div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title">Offene Wiedervorlagen (${open.length})</div>
+      ${open.length===0?'<div style="color:var(--muted);font-size:13px">Keine offenen Wiedervorlagen 🎉</div>':
+      open.map(fu=>{
+        const m = getMember(fu.memberId);
+        const isLate = fu.dueDate && fu.dueDate < today_;
+        const bila = fu.bilaId ? state.bilas.find(b=>b.id===fu.bilaId) : null;
+        return `<div class="fu-item">
+          <div class="fu-dot ${isLate?'late':''}"></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500">${fu.text}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap">
+              ${fu.dueDate?`<span class="${isLate?'overdue':''}">⏰ ${fmtDate(fu.dueDate)}</span>`:''}
+              ${m?`<span>👤 ${m.name}</span>`:''}
+              ${bila?`<span style="cursor:pointer;color:var(--accent)" onclick="openBilaDetail(${bila.id})">📅 ${fmtDate(bila.date)}</span>`:''}
+            </div>
+          </div>
+          <div style="display:flex;gap:5px;flex-shrink:0">
+            <button class="btn btn-sm btn-primary" onclick="toggleFollowupDone('${fu.id}')">✓</button>
+            <button class="btn btn-sm" onclick="openFollowupModal(null,null,'${fu.id}')">✏</button>
+            <button class="btn btn-sm" onclick="deleteFollowup('${fu.id}')" style="color:var(--danger);border-color:var(--danger)">✕</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    ${done.length?`<div class="card"><div class="card-title" style="color:var(--muted)">Erledigt (${done.length})</div>
+    ${done.slice(0,10).map(fu=>`<div class="fu-item" style="opacity:.6">
+      <div class="fu-dot done"></div>
+      <div style="flex:1"><div style="font-size:13px;text-decoration:line-through">${fu.text}</div><div style="font-size:11px;color:var(--muted)">${fu.dueDate?fmtDate(fu.dueDate):''} ${getMember(fu.memberId)?'· '+getMember(fu.memberId).name:''}</div></div>
+      <button class="btn btn-sm" onclick="toggleFollowupDone('${fu.id}')">↩</button>
+    </div>`).join('')}
+    </div>`:''}`;
+}
+
+
+// ── Toast notification ──────────────────────────────────────────
+let _toastTimer = null;
+function showToast(msg, type='ok', duration=2800){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>{ el.className=''; }, duration);
+}
+
+// ── Drive status pill in sidebar logo area ───────────────────────
+function updateDrivePill(){
+  const pill = document.getElementById('drive-pill');
+  if(!pill) return;
+  if(isSignedIn()){
+    pill.className='drive-pill ok';
+    pill.innerHTML='☁ Sync';
+  } else {
+    pill.className='drive-pill off';
+    pill.innerHTML='☁ –';
+  }
+}
+
+
+// ── metricCard helper ────────────────────────────────────────
+function metricCard(icon, label, val, cls, trend){
+  return `<div class="metric ${cls||''}">
+    <div class="metric-icon">${icon}</div>
+    <div class="metric-label">${label}</div>
+    <div class="metric-val">${val}</div>
+    ${trend?`<div class="metric-trend">${trend}</div>`:''}
+  </div>`;
+}
+
+// ── emptyState helper ────────────────────────────────────────
+function emptyState(icon, title, text, btnLabel, btnAction){
+  return `<div class="empty-state">
+    <div class="empty-state-icon">${icon}</div>
+    <div class="empty-state-title">${title}</div>
+    <div class="empty-state-text">${text}</div>
+    ${btnLabel?`<div class="empty-state-action"><button class="btn btn-primary btn-sm" onclick="${btnAction}">${btnLabel}</button></div>`:''}
+  </div>`;
+}
+
+// ── Context Menu ─────────────────────────────────────────────
+let _ctxMenu = null;
+function showCtxMenu(e, items){
+  closeCtxMenu();
+  e.preventDefault();
+  e.stopPropagation();
+  const menu = document.createElement('div');
+  menu.className = 'ctx-menu';
+  menu.id = 'ctx-menu';
+  menu.innerHTML = items.map(item=>{
+    if(item==='-') return '<div class="ctx-divider"></div>';
+    return `<div class="ctx-item ${item.danger?'danger':''}" onclick="closeCtxMenu();(${item.action})()">${item.icon||''} ${item.label}</div>`;
+  }).join('');
+  // Position
+  const x = Math.min(e.clientX, window.innerWidth - 180);
+  const y = Math.min(e.clientY, window.innerHeight - items.length*44);
+  menu.style.cssText = `left:${x}px;top:${y}px`;
+  document.body.appendChild(menu);
+  _ctxMenu = menu;
+  setTimeout(()=>document.addEventListener('click', closeCtxMenu, {once:true}), 0);
+}
+function closeCtxMenu(){ _ctxMenu?.remove(); _ctxMenu=null; }
+
+// ── Filter panel toggle ──────────────────────────────────────
+function toggleFilterPanel(panelId, btnId){
+  const panel = document.getElementById(panelId);
+  const btn = document.getElementById(btnId);
+  if(!panel) return;
+  const open = panel.classList.toggle('open');
+  if(btn) btn.classList.toggle('active', open);
+}
+
+function countActiveFilters(ids){
+  return ids.filter(id=>{ const el=document.getElementById(id); return el&&el.value; }).length;
+}
+
+// ============================================================
 // INIT
 // ============================================================
 load();
@@ -3340,6 +4378,7 @@ if (!state.teams.length) {
 
 renderTeamSelector();
 renderSidebar();
+updateDrivePill();
 renderDashboard();
 </script>
 </body>
