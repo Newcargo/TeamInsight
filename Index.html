@@ -1,0 +1,3194 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Team Insight v3.0</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sidebar:240px;
+  --accent:#185FA5;
+  --accent-light:#E6F1FB;
+  --bg:#f7f8fa;
+  --card:#fff;
+  --border:#e2e4e9;
+  --text:#1a1d23;
+  --muted:#6b7280;
+  --danger:#E24B4A;
+  --success:#639922;
+  --warn:#BA7517;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;display:flex}
+/* SIDEBAR */
+#sidebar{width:var(--sidebar);min-height:100vh;background:#1a1d23;color:#e5e7eb;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;transition:transform .25s}
+.sb-logo{padding:20px 16px 12px;font-size:16px;font-weight:600;color:#fff;border-bottom:1px solid #2d3139;display:flex;align-items:center;gap:8px}
+.sb-logo svg{flex-shrink:0}
+.sb-section{padding:12px 8px 4px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-top:4px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:6px;margin:1px 8px;cursor:pointer;font-size:13px;color:#cbd5e1;transition:background .15s}
+.sb-item:hover{background:#2d3139;color:#fff}
+.sb-item.active{background:var(--accent);color:#fff}
+.sb-item svg{flex-shrink:0;opacity:.8}
+.sb-divider{border:none;border-top:1px solid #2d3139;margin:8px 0}
+.sb-members{flex:1;overflow-y:auto;padding:0 8px 8px}
+.member-btn{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:background .15s;width:100%;color:#cbd5e1}
+.member-btn:hover{background:#2d3139;color:#fff}
+.member-btn.active{background:#2d3139;color:#fff}
+.avatar-sm{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+/* TEAM SELECTOR in sidebar */
+.team-selector{padding:8px;border-bottom:1px solid #2d3139}
+.team-selector select{width:100%;background:#2d3139;color:#e5e7eb;border:1px solid #3d4149;border-radius:6px;padding:6px 8px;font-size:12px;cursor:pointer}
+/* MAIN */
+#main{flex:1;overflow-y:auto;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;gap:8px;overflow:hidden}
+.topbar-title{font-size:16px;font-weight:600;flex-shrink:0}
+.topbar-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;font-weight:500;color:var(--text);transition:background .15s;white-space:nowrap}
+.btn:hover{background:var(--bg)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#0f4d8a}
+.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.content{padding:20px}
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.metric{background:var(--bg);border-radius:8px;padding:12px 14px}
+.metric-label{font-size:11px;color:var(--muted);margin-bottom:4px}
+.metric-val{font-size:20px;font-weight:600}
+.metric-val.good{color:var(--success)}
+.metric-val.warn{color:var(--warn)}
+.metric-val.bad{color:var(--danger)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);font-weight:500;color:var(--muted);font-size:12px}
+td{padding:9px 10px;border-bottom:1px solid #f0f2f5}
+tr:hover td{background:#fafbfc}
+tr:last-child td{border-bottom:none}
+/* TAGS */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;background:#EAF3DE;color:#3B6D11}
+.tag.blue{background:#E6F1FB;color:#185FA5}
+.tag.amber{background:#FAEEDA;color:#854F0B}
+.tag.red{background:#FCEBEB;color:#A32D2D}
+.tag.purple{background:#EEEDFE;color:#3C3489}
+.tag.gray{background:#F1EFE8;color:#5F5E5A}
+.tag.pink{background:#FBEAF0;color:#72243E}
+/* BADGE */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:#EAF3DE;color:#3B6D11}
+.badge-blue{background:#E6F1FB;color:#185FA5}
+.badge-amber{background:#FAEEDA;color:#854F0B}
+.badge-red{background:#FCEBEB;color:#A32D2D}
+.badge-gray{background:#F1EFE8;color:#5F5E5A}
+/* FORM */
+.form-row{margin-bottom:14px}
+label.fl{display:block;font-size:12px;font-weight:500;margin-bottom:5px;color:var(--muted)}
+input[type=text],input[type=date],input[type=email],input[type=password],input[type=url],textarea,select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;color:var(--text);background:#fff;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:70px}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:28px;width:900px;max-width:96vw;max-height:94vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative}
+.topbar-actions{display:flex;gap:6px;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0}
+.topbar-actions::-webkit-scrollbar{display:none}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:16px;font-weight:600}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:0 4px;line-height:1}
+/* BILA ENTRY */
+.bila-entry{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:box-shadow .15s}
+.bila-entry:hover{box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.bila-meta{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.bila-date{font-size:12px;color:var(--muted)}
+.bila-preview{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* TASK */
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0f2f5}
+.task-item:last-child{border-bottom:none}
+.task-check{width:16px;height:16px;border:2px solid var(--border);border-radius:3px;flex-shrink:0;cursor:pointer;margin-top:1px;display:flex;align-items:center;justify-content:center}
+.task-check.done{background:var(--success);border-color:var(--success)}
+.task-body{flex:1;min-width:0}
+.task-title{font-size:13px}
+.task-title.done{text-decoration:line-through;color:var(--muted)}
+.task-meta{font-size:11px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+/* SECTION HEADERS */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-size:14px;font-weight:600}
+/* AI PANEL */
+.ai-chat{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden;max-height:400px;overflow-y:auto}
+.ai-msg{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;line-height:1.5}
+.ai-msg:last-child{border-bottom:none}
+.ai-msg.user{background:#EBF4FF;color:#1a1d23}
+.ai-msg.ai{background:#fff}
+.ai-label{font-size:11px;font-weight:600;margin-bottom:4px;color:var(--muted)}
+.ai-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);background:#fff}
+.ai-input-row input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px}
+/* AVATAR COLORS */
+.av-blue{background:#E6F1FB;color:#185FA5}
+.av-teal{background:#E1F5EE;color:#0F6E56}
+.av-coral{background:#FAECE7;color:#993C1D}
+.av-purple{background:#EEEDFE;color:#3C3489}
+.av-amber{background:#FAEEDA;color:#854F0B}
+.av-pink{background:#FBEAF0;color:#72243E}
+/* PROFILE */
+.profile-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.avatar-lg{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex-shrink:0}
+/* DETAIL VIEW */
+.detail-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto}
+.tab{padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover{color:var(--text)}
+/* RISK */
+.risk-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0f2f5}
+.risk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.dot-red{background:var(--danger)}
+.dot-amber{background:var(--warn)}
+.dot-green{background:var(--success)}
+/* CONFIDENTIAL */
+.conf-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.conf-standard{background:#F1EFE8;color:#5F5E5A}
+.conf-personal{background:#E6F1FB;color:#185FA5}
+.conf-confidential{background:#FAEEDA;color:#854F0B}
+.conf-hr{background:#FCEBEB;color:#A32D2D}
+/* SCROLL */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+/* SEARCH BAR */
+.search-bar{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:16px}
+.search-bar input{border:none;outline:none;flex:1;font-size:13px;color:var(--text);background:transparent}
+/* NOTIFICATION DOT */
+.notif{width:7px;height:7px;background:var(--danger);border-radius:50%;flex-shrink:0}
+/* STAR RATING */
+.star-row{display:flex;gap:4px;align-items:center}
+.star{font-size:20px;cursor:pointer;color:#d1d5db;transition:color .1s;line-height:1}
+.star.on{color:#f59e0b}
+.star:hover,.star:hover~.star{color:#f59e0b}
+/* DEV GOAL CARD */
+.goal-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.goal-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.goal-status-bar{height:4px;border-radius:2px;background:#e5e7eb;margin-top:8px;overflow:hidden}
+.goal-status-fill{height:100%;border-radius:2px;background:var(--accent);transition:width .3s}
+/* FILTER BAR */
+.filter-bar{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.filter-bar > div{flex:1;min-width:120px}
+@media(max-width:700px){
+  .filter-bar{gap:8px}
+  .filter-bar > div{min-width:calc(50% - 4px)!important;flex:none;width:calc(50% - 4px)}
+  .filter-bar > button{width:100%}
+}
+@media(max-width:400px){
+  .filter-bar > div{min-width:100%!important;width:100%}
+}
+/* FEEDBACK CARD */
+.fb-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;cursor:pointer}
+.fb-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.07)}
+/* SETUP GUIDE */
+.guide-step{display:flex;gap:14px;margin-bottom:20px}
+.guide-num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.guide-body{flex:1;min-width:0}
+.guide-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.guide-text{font-size:13px;color:var(--muted);line-height:1.6}
+.guide-text a{color:var(--accent)}
+.guide-code{font-family:monospace;background:#f0f2f5;padding:4px 8px;border-radius:4px;font-size:12px;display:inline-block;margin:2px 0;word-break:break-all}
+.guide-tip{background:#E6F1FB;border-left:3px solid var(--accent);padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#185FA5;margin-top:8px}
+.guide-warn{background:#FAEEDA;border-left:3px solid var(--warn);padding:8px 12px;border-radius:0 6px 6px 0;font-size:12px;color:#854F0B;margin-top:8px}
+.guide-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.guide-header-icon{font-size:28px;line-height:1}
+.guide-header-title{font-size:15px;font-weight:600}
+.guide-header-sub{font-size:12px;color:var(--muted);margin-top:2px}
+/* SYNC STATUS */
+#sync-status{font-size:11px;padding:3px 8px;border-radius:10px;margin-left:8px}
+.sync-ok{background:#EAF3DE;color:#3B6D11}
+.sync-err{background:#FCEBEB;color:#A32D2D}
+.sync-ing{background:#FAEEDA;color:#854F0B}
+/* BACKUP PANEL */
+.backup-provider{display:flex;align-items:flex-start;gap:10px;padding:14px 0;border-bottom:1px solid var(--border)}
+.backup-provider:last-child{border-bottom:none}
+.backup-provider input[type=checkbox]{width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer}
+.backup-label{font-size:13px;font-weight:500}
+.backup-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.backup-fields{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.backup-fields input{font-size:12px;padding:6px 8px}
+/* HAMBURGER */
+#hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text)}
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:49}
+/* TEAM CHIPS */
+.team-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;background:#EEEDFE;color:#3C3489;margin:2px}
+/* MULTI-TEAM MEMBER BADGE */
+.multi-team-badge{font-size:10px;background:#FAEEDA;color:#854F0B;border-radius:3px;padding:1px 5px;margin-left:4px}
+/* MOBILE */
+@media(max-width:700px){
+  /* Sidebar */
+  #hamburger{display:flex;align-items:center;justify-content:center}
+  #sidebar{position:fixed;left:0;top:0;height:100vh;z-index:50;transform:translateX(-100%);width:280px}
+  #sidebar.open{transform:translateX(0)}
+  #sidebar-overlay.open{display:block}
+
+  /* Layout */
+  body{font-size:13px}
+  .grid2{grid-template-columns:1fr}
+  .form-grid2{grid-template-columns:1fr}
+  .form-grid3{grid-template-columns:1fr 1fr}
+  .metric-grid{grid-template-columns:1fr 1fr}
+  .content{padding:12px}
+
+  /* Topbar */
+  .topbar{padding:0 10px;height:48px;gap:6px}
+  .topbar-title{font-size:14px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .topbar-actions{gap:4px;flex-wrap:nowrap;overflow-x:auto}
+  .topbar-actions .btn{padding:5px 8px;font-size:11px;white-space:nowrap}
+  #sync-status{display:none}
+
+  /* Cards */
+  .card{padding:14px}
+  .modal{padding:14px;max-height:96vh}
+  .profile-header{flex-direction:column;align-items:flex-start;gap:10px}
+  .profile-header > div:last-child{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+
+  /* Tabs - scrollable */
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{padding:8px 12px;font-size:12px;white-space:nowrap}
+
+  /* Task items - stack action buttons */
+  .task-item{flex-wrap:wrap;gap:6px}
+  .task-item > div:last-child{margin-left:auto}
+
+  /* Filter bars - vertical stack */
+  .content [style*="display:flex"][style*="flex-wrap:wrap"]{flex-direction:column}
+  .content [style*="display:flex"][style*="flex-wrap:wrap"] > div[style*="flex:1"]{min-width:100%!important}
+
+  /* Goal cards */
+  .goal-card{padding:12px}
+
+  /* Bila entries */
+  .bila-entry{padding:12px}
+  .bila-meta{gap:6px}
+
+  /* Member buttons in sidebar */
+  .member-btn{padding:8px}
+
+  /* BILA modal grid - single column on mobile */
+  #bila-modal-body [style*="grid-template-columns"]{display:flex;flex-direction:column;gap:8px}
+
+  /* Dashboard dev goals card - single col */
+  .dashboard-goals-grid{grid-template-columns:1fr}
+
+  /* Team selector */
+  .team-selector select{font-size:13px}
+
+  /* Backup fields */
+  .backup-provider{flex-direction:column;gap:6px}
+
+  /* Section heads */
+  .section-head{flex-wrap:wrap;gap:6px}
+
+  /* Member modal tabs */
+  #mm-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Child rows / emergency contact rows on mobile */
+  .child-row{flex-wrap:wrap}
+  .ec-row{grid-template-columns:1fr 1fr!important}
+  .ec-row input:first-of-type{grid-column:1/-1}
+
+  /* Avatar large */
+  .avatar-lg{width:44px;height:44px;font-size:15px}
+
+  /* Metric values smaller */
+  .metric-val{font-size:18px}
+
+  /* Guide steps */
+  .guide-step{gap:10px}
+  .guide-num{width:22px;height:22px;font-size:11px}
+}
+
+@media(max-width:400px){
+  .metric-grid{grid-template-columns:1fr 1fr}
+  .topbar-title{max-width:90px}
+  .form-grid3{grid-template-columns:1fr}
+  .ec-row{grid-template-columns:1fr!important}
+  .topbar-actions .btn{padding:4px 6px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sb-logo">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#378ADD" stroke-width="1.5"/><path d="M6 10.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#378ADD" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="7" r="1.5" fill="#378ADD"/></svg>
+    Team Insight
+  </div>
+
+  <!-- TEAM SELECTOR -->
+  <div class="team-selector">
+    <select id="team-select" onchange="switchTeam(this.value)"></select>
+  </div>
+
+  <div class="sb-section">Navigation</div>
+  <div class="sb-item active" onclick="showView('dashboard');closeSidebar()" id="nav-dashboard">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+    Dashboard
+  </div>
+  <div class="sb-item" onclick="showView('tasks');closeSidebar()" id="nav-tasks">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Aufgaben
+    <span id="task-count" class="badge badge-amber" style="margin-left:auto;font-size:10px"></span>
+  </div>
+  <div class="sb-item" onclick="showView('bilas');closeSidebar()" id="nav-bilas">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 1v4M11 1v4M2 7h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Gespräche
+  </div>
+  <div class="sb-item" onclick="showView('feedback');closeSidebar()" id="nav-feedback">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12v8H9l-3 2v-2H2V3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M5 7h6M5 5.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Feedback-Tracking
+  </div>
+  <div class="sb-item" onclick="showView('ai');closeSidebar()" id="nav-ai">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 9.5S6.5 11 8 11s2.5-1.5 2.5-1.5M6 7h.01M10 7h.01" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    KI-Assistent
+  </div>
+  <div class="sb-item" onclick="showView('devgoals');closeSidebar()" id="nav-devgoals">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M5 2.5l1.5 1.5M11 2.5L9.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Entwicklungsziele
+  </div>
+  <div class="sb-item" onclick="showView('settings');closeSidebar()" id="nav-settings">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Einstellungen
+  </div>
+
+  <hr class="sb-divider">
+  <div class="sb-section" id="sb-team-label">Team</div>
+  <div class="sb-item" onclick="openAddMemberModal();closeSidebar()" style="color:#6b7280;font-size:12px">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v6M4 7h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Mitglied hinzufügen
+  </div>
+  <div class="sb-members" id="member-list"></div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="topbar">
+    <button id="hamburger" onclick="openSidebar()" aria-label="Menü">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <span class="topbar-title" id="topbar-title">Dashboard</span>
+    <div class="topbar-actions" id="topbar-actions">
+      <span id="sync-status"></span>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<!-- MODALS -->
+<div class="overlay" id="overlay-bila">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="bila-modal-title">Neues Gespräch</span><button class="modal-close" onclick="closeOverlay('overlay-bila')">&#215;</button></div><div id="bila-modal-body"></div></div>
+</div>
+<div class="overlay" id="overlay-task">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="task-modal-title">Neue Aufgabe</span><button class="modal-close" onclick="closeOverlay('overlay-task')">&#215;</button></div><div id="task-modal-body"></div></div>
+</div>
+<div class="overlay" id="overlay-member">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="member-modal-title">Mitglied anlegen</span><button class="modal-close" onclick="closeOverlay('overlay-member')">&#215;</button></div><div id="member-modal-body"></div></div>
+</div>
+<div class="overlay" id="overlay-bila-detail">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="bila-detail-title">Gespräch</span><button class="modal-close" onclick="closeOverlay('overlay-bila-detail')">&#215;</button></div><div id="bila-detail-body"></div></div>
+</div>
+<div class="overlay" id="overlay-team">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="team-modal-title">Team anlegen</span><button class="modal-close" onclick="closeOverlay('overlay-team')">&#215;</button></div><div id="team-modal-body"></div></div>
+</div>
+
+<div class="overlay" id="overlay-devgoal">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="devgoal-modal-title">Entwicklungsziel</span><button class="modal-close" onclick="closeOverlay('overlay-devgoal')">&#215;</button></div><div id="devgoal-modal-body"></div></div>
+</div>
+<div class="overlay" id="overlay-feedback">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="feedback-modal-title">Feedback erfassen</span><button class="modal-close" onclick="closeOverlay('overlay-feedback')">&#215;</button></div><div id="feedback-modal-body"></div></div>
+</div>
+<div class="overlay" id="overlay-setup-guide">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Backup einrichten – Schritt-für-Schritt</span>
+      <button class="modal-close" onclick="closeOverlay('overlay-setup-guide')">&#215;</button>
+    </div>
+    <div class="tabs" style="margin-bottom:0;margin-top:-8px" id="guide-tabs">
+      <div class="tab active" onclick="showGuideTab('gist')">GitHub Gist</div>
+      <div class="tab" onclick="showGuideTab('local')">Lokal</div>
+      <div class="tab" onclick="showGuideTab('onedrive')">OneDrive</div>
+      <div class="tab" onclick="showGuideTab('gdrive')">Google Drive</div>
+      <div class="tab" onclick="showGuideTab('nas')">Synology NAS</div>
+    </div>
+    <div id="guide-content" style="padding-top:20px"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const AVATAR_COLORS = ['av-blue','av-teal','av-coral','av-purple','av-amber','av-pink'];
+const TAG_COLORS = ['','blue','amber','red','purple','gray','pink'];
+const ALL_TAGS = ['Karriere','Motivation','Konflikt','Scrum','Agile','Weiterbildung','Performance','Teamwork','Blocker','Technisch','Urlaub','Probezeit'];
+const BILA_TYPES = ['Reguläres BILA','Probezeitgespräch','Jahresgespräch','Entwicklungsgespräch','Coaching-Session'];
+const PRIOS = ['Hoch','Mittel','Niedrig'];
+const CONF_LEVELS = ['Standard','Persönlich','Vertraulich','HR-relevant'];
+
+const APP_VERSION = '3.0';
+
+// Global HTML escape helper
+function esc(v) { return (v||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  teams: [],          // [{id, name, color}]
+  members: [],        // [{id, name, role, teamIds:[], ...}]
+  bilas: [],          // [{id, memberId, teamId, ...}]
+  tasks: [],          // [{id, assignee, teamId, ...}]
+  aiHistory: [],
+  backup: {
+    localEnabled: false,
+    gistEnabled: false, gistToken: '', gistId: '',
+    onedrive: false,
+    gdrive: false,
+    synology: false, synologyUrl: '', synologyUser: '', synologyPass: '', synologyPath: '/teaminsight/backup.json'
+  },
+  nextTeamId: 1,
+  nextMemberId: 1,
+  nextBilaId: 1,
+  nextTaskId: 1,
+};
+
+let currentTeamId = null;  // active team filter
+let currentView = 'dashboard';
+let selectedMember = null;
+let selectedMemberTab = 'bilas';
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+function save() {
+  try { localStorage.setItem('teaminsight_v2', JSON.stringify(state)); } catch(e) {}
+  triggerBackup();
+}
+function load() {
+  try {
+    const d = localStorage.getItem('teaminsight_v2');
+    if (d) { state = JSON.parse(d); return; }
+    // Migrate from v1
+    const old = localStorage.getItem('teaminsight');
+    if (old) {
+      const o = JSON.parse(old);
+      const tid = 1;
+      state.teams = [{id: tid, name: 'Mein Team', color: 'av-blue'}];
+      state.nextTeamId = 2;
+      state.members = (o.members||[]).map(m=>({...m, teamIds:[tid]}));
+      state.bilas = (o.bilas||[]).map(b=>({...b, teamId: tid}));
+      state.tasks = (o.tasks||[]).map(t=>({...t, teamId: tid}));
+      state.aiHistory = o.aiHistory||[];
+      state.nextMemberId = o.nextMemberId||1;
+      state.nextBilaId = o.nextBilaId||1;
+      state.nextTaskId = o.nextTaskId||1;
+      currentTeamId = tid;
+    }
+  } catch(e) {}
+}
+
+// ============================================================
+// BACKUP SYSTEM
+// ============================================================
+let backupTimer = null;
+function triggerBackup() {
+  clearTimeout(backupTimer);
+  backupTimer = setTimeout(runBackup, 2000);
+}
+
+async function runBackup() {
+  const bp = state.backup;
+  if (bp.localEnabled) {
+    exportDataManual();
+  }
+}
+
+function setSyncStatus(type, msg) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.className = 'sync-'+type;
+  el.textContent = msg;
+  if (type==='ok') setTimeout(()=>{ if(el) el.textContent=''; el.className=''; }, 4000);
+}
+
+async function loadFromGist() {
+  const bp = state.backup;
+  if (!bp.gistEnabled || !bp.gistToken || !bp.gistId) return;
+  try {
+    const r = await fetch(`https://api.github.com/gists/${bp.gistId}`, {
+      headers: { 'Authorization': `token ${bp.gistToken}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (r.ok) {
+      const data = await r.json();
+      const content = data.files?.['teaminsight_backup.json']?.content;
+      if (content) {
+        const imported = JSON.parse(content);
+        state = imported;
+        localStorage.setItem('teaminsight_v2', JSON.stringify(state));
+        setSyncStatus('ok', 'Geladen vom Gist');
+      }
+    }
+  } catch(e) { setSyncStatus('err', 'Gist-Ladefehler'); }
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function initials(name) { return name.split(' ').filter(Boolean).slice(0,2).map(p=>p[0].toUpperCase()).join(''); }
+function avatarColor(idx) { return AVATAR_COLORS[idx % AVATAR_COLORS.length]; }
+function fmtDate(d) {
+  if (!d) return '–';
+  return new Date(d).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+function isOverdue(d) { return d && d < today(); }
+function getMember(id) { return state.members.find(m=>m.id===id); }
+function getBila(id) { return state.bilas.find(b=>b.id===id); }
+function getTask(id) { return state.tasks.find(t=>t.id===id); }
+function getTeam(id) { return state.teams.find(t=>t.id===id); }
+function confClass(level) {
+  const map = {'Standard':'conf-standard','Persönlich':'conf-personal','Vertraulich':'conf-confidential','HR-relevant':'conf-hr'};
+  return map[level]||'conf-standard';
+}
+
+// Current team filter helpers
+function activeTeamMembers() {
+  if (!currentTeamId) return state.members;
+  return state.members.filter(m=>(m.teamIds||[]).includes(currentTeamId));
+}
+function activeTeamBilas() {
+  if (!currentTeamId) return state.bilas;
+  return state.bilas.filter(b=>b.teamId===currentTeamId || activeTeamMembers().some(m=>m.id===b.memberId));
+}
+function activeTeamTasks() {
+  if (!currentTeamId) return state.tasks;
+  return state.tasks.filter(t=>t.teamId===currentTeamId || (t.assignee && activeTeamMembers().some(m=>m.id===t.assignee)));
+}
+
+// ============================================================
+// MOBILE SIDEBAR
+// ============================================================
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ============================================================
+// TEAM MANAGEMENT
+// ============================================================
+function renderTeamSelector() {
+  const sel = document.getElementById('team-select');
+  if (!sel) return;
+  sel.innerHTML = `<option value="">Alle Teams</option>` +
+    state.teams.map(t=>`<option value="${t.id}" ${t.id===currentTeamId?'selected':''}>${t.name}</option>`).join('') +
+    `<option value="__new__">+ Neues Team…</option>`;
+  const label = document.getElementById('sb-team-label');
+  if (label) label.textContent = currentTeamId ? (getTeam(currentTeamId)||{}).name||'Team' : 'Alle Teams';
+}
+
+function switchTeam(val) {
+  if (val === '__new__') {
+    openTeamModal();
+    document.getElementById('team-select').value = currentTeamId||'';
+    return;
+  }
+  currentTeamId = val ? parseInt(val) : null;
+  selectedMember = null;
+  renderTeamSelector();
+  renderSidebar();
+  if (currentView==='dashboard') renderDashboard();
+  else if (currentView==='tasks') renderTasksView();
+  else if (currentView==='bilas') renderBilasView();
+  else if (currentView==='member') showView('dashboard');
+}
+
+function openTeamModal(editId) {
+  const editing = editId ? getTeam(editId) : null;
+  document.getElementById('team-modal-title').textContent = editing ? 'Team bearbeiten' : 'Neues Team';
+  document.getElementById('team-modal-body').innerHTML = `
+    <div class="form-row"><label class="fl">Teamname *</label><input type="text" id="tm-tname" value="${editing?editing.name:''}" placeholder="z.B. RUAG C5I / Scrum Team Alpha"></div>
+    <div class="form-row"><label class="fl">Beschreibung / Notizen</label><textarea id="tm-tnotes" rows="3" placeholder="Zweck, Kontext, Besonderheiten des Teams…">${editing?editing.notes||'':''}</textarea></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-primary" onclick="saveTeam(${editing?editing.id:0})">Speichern</button>
+      ${editing?`<button class="btn btn-danger btn-sm" onclick="deleteTeam(${editing.id})">Team löschen</button>`:''}
+      <button class="btn" onclick="closeOverlay('overlay-team')">Abbrechen</button>
+    </div>
+  `;
+  openOverlay('overlay-team');
+}
+
+function saveTeam(editId) {
+  const name = document.getElementById('tm-tname').value.trim();
+  if (!name) { alert('Teamname erforderlich'); return; }
+  const notes = document.getElementById('tm-tnotes').value;
+  if (editId) {
+    const t = getTeam(editId);
+    if (t) { t.name = name; t.notes = notes; }
+  } else {
+    const id = state.nextTeamId++;
+    state.teams.push({id, name, notes});
+    currentTeamId = id;
+  }
+  save();
+  closeOverlay('overlay-team');
+  renderTeamSelector();
+  renderSidebar();
+  renderDashboard();
+}
+
+function deleteTeam(id) {
+  if (!confirm('Team wirklich löschen? Gespräche und Aufgaben dieses Teams bleiben erhalten.')) return;
+  state.teams = state.teams.filter(t=>t.id!==id);
+  state.members.forEach(m=>{ m.teamIds = (m.teamIds||[]).filter(tid=>tid!==id); });
+  if (currentTeamId===id) currentTeamId = state.teams.length ? state.teams[0].id : null;
+  save();
+  closeOverlay('overlay-team');
+  renderTeamSelector();
+  renderSidebar();
+  renderDashboard();
+}
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+function renderSidebar() {
+  renderTeamSelector();
+  // Apply module visibility to nav items
+  ['tasks','bilas','feedback','ai','devgoals'].forEach(key => {
+    const el = document.getElementById('nav-'+key);
+    if (el) el.style.display = modEnabled(key) ? '' : 'none';
+  });
+  // Restore active nav item
+  if (currentView !== 'member') {
+    _setActiveSb('nav-'+currentView);
+  } else {
+    document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  }
+  const members = activeTeamMembers();
+  const ml = document.getElementById('member-list');
+  ml.innerHTML = members.map((m,i) => {
+    const globalIdx = state.members.indexOf(m);
+    const multiTeam = (m.teamIds||[]).length > 1;
+    const open = activeTeamTasks().filter(t=>t.assignee===m.id&&t.status!=='Erledigt').length;
+    const isActive = selectedMember===m.id;
+    return `<div class="member-btn ${isActive?'active':''}" onclick="openMember(${m.id})">
+      <div class="avatar-sm ${avatarColor(globalIdx)}">${initials(m.name)}</div>
+      <span style="font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.name}${multiTeam?'<span class="multi-team-badge">Multi</span>':''}</span>
+      ${open>0?`<span class="notif"></span>`:''}
+    </div>`;
+  }).join('');
+  updateTaskBadge();
+}
+
+function updateTaskBadge() {
+  const open = activeTeamTasks().filter(t=>t.status!=='Erledigt').length;
+  const el = document.getElementById('task-count');
+  if (el) el.textContent = open > 0 ? open : '';
+}
+
+// ============================================================
+// NAV
+// ============================================================
+function showView(view) {
+  currentView = view;
+  selectedMember = null;
+  _setActiveSb('nav-'+view);
+  document.querySelectorAll('.member-btn').forEach(el=>el.classList.remove('active'));
+  const titleMap = {dashboard:'Dashboard',tasks:'Aufgaben',bilas:'Alle Gespräche',ai:'KI-Assistent',settings:'Einstellungen',feedback:'Feedback-Tracking',devgoals:'Entwicklungsziele'};
+  document.getElementById('topbar-title').textContent = titleMap[view] || view;
+  if (view==='dashboard') renderDashboard();
+  else if (view==='tasks') renderTasksView();
+  else if (view==='bilas') renderBilasView();
+  else if (view==='ai') renderAIView();
+  else if (view==='settings') renderSettingsView();
+  else if (view==='feedback') renderFeedbackView();
+  else if (view==='devgoals') renderDevGoalsView();
+}
+
+function _setActiveSb(id) {
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function openMember(id) {
+  selectedMember = id;
+  const m = getMember(id);
+  if (!m) return;
+  _setActiveSb('');  // clear nav items
+  // mark the correct member button
+  document.querySelectorAll('.member-btn').forEach(el=>{
+    const isThis = el.getAttribute('onclick')&&el.getAttribute('onclick').includes('openMember('+id+')');
+    el.classList.toggle('active', isThis);
+  });
+  document.getElementById('topbar-title').textContent = m.name;
+  renderMemberView(id);
+  currentView = 'member';
+  closeSidebar();
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const members = activeTeamMembers();
+  const bilas = activeTeamBilas();
+  const tasks = activeTeamTasks();
+  const openTasks = tasks.filter(t=>t.status!=='Erledigt').length;
+  const overdueTasks = tasks.filter(t=>t.status!=='Erledigt'&&isOverdue(t.due)).length;
+  const recentBilas = [...bilas].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  const openTasksList = tasks.filter(t=>t.status!=='Erledigt').sort((a,b)=>{
+    const po={Hoch:0,Mittel:1,Niedrig:2};return (po[a.priority]||1)-(po[b.priority]||1);
+  }).slice(0,6);
+  const risks = analyzeRisks();
+  const teamLabel = currentTeamId ? (getTeam(currentTeamId)||{}).name||'' : 'Alle Teams';
+
+  document.getElementById('topbar-actions').innerHTML = `
+    <span id="sync-status"></span>
+    ${modEnabled('bilas')?'<button class="btn btn-sm" onclick="openNewBilaModal()" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">+ Gespräch</button>':''}
+    ${modEnabled('tasks')?'<button class="btn btn-sm" onclick="openNewTaskModal()" style="background:#dcfce7;border-color:#86efac;color:#166534">+ Aufgabe</button>':''}
+    ${modEnabled('devgoals')?'<button class="btn btn-sm" onclick="openDevGoalModal()" style="background:#fef3c7;border-color:#fcd34d;color:#92400e">+ Ziel</button>':''}
+    ${modEnabled('feedback')?'<button class="btn btn-sm" onclick="openFeedbackModal()" style="background:#fae8ff;border-color:#e879f9;color:#7e22ce">+ Feedback</button>':''}
+  `;
+
+  document.getElementById('content').innerHTML = `
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Mitglieder</div><div class="metric-val">${members.length}</div></div>
+      <div class="metric"><div class="metric-label">Offene Aufgaben</div><div class="metric-val ${openTasks>5?'warn':''}">${openTasks}</div></div>
+      <div class="metric"><div class="metric-label">Überfällig</div><div class="metric-val ${overdueTasks>0?'bad':''}">${overdueTasks}</div></div>
+      <div class="metric"><div class="metric-label">Gespräche (7T)</div><div class="metric-val">${bilas.filter(b=>{const diff=(new Date(b.date)-new Date())/(864e5);return diff>=-7&&diff<=7;}).length}</div></div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        ${modEnabled('tasks')?`<div class="card" style="margin-bottom:16px">
+          <div class="section-head"><span class="section-title">Nächste Aufgaben</span><button class="btn btn-sm" onclick="showView('tasks')">Alle →</button></div>
+          ${openTasksList.length===0?'<div class="empty" style="padding:20px 0">Keine offenen Aufgaben</div>':
+          openTasksList.map(t => {
+            const m = getMember(t.assignee);
+            const gi = state.members.indexOf(m);
+            return `<div class="task-item">
+              <div class="task-check" onclick="toggleTask(${t.id})"></div>
+              <div class="task-body">
+                <div class="task-title">${t.title}</div>
+                <div class="task-meta">
+                  ${m?`<span class="tag blue" style="padding:1px 6px">${m.name}</span>`:''}
+                  <span class="${isOverdue(t.due)&&t.status!=='Erledigt'?'overdue':''}">${t.due?fmtDate(t.due):''}</span>
+                  <span class="badge ${t.priority==='Hoch'?'badge-red':t.priority==='Mittel'?'badge-amber':'badge-gray'}">${t.priority}</span>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`:''}
+        <div class="card">
+          <div class="section-head"><span class="section-title">Trends &amp; Risiken</span></div>
+          ${risks.length===0?'<div style="color:var(--muted);font-size:13px">Keine auffälligen Trends</div>':
+          risks.map(r=>`<div class="risk-item"><div class="risk-dot dot-${r.level}"></div><div><div style="font-size:13px">${r.text}</div><div style="font-size:11px;color:var(--muted)">${r.sub}</div></div></div>`).join('')}
+        </div>
+      </div>
+      <div>
+        ${modEnabled('bilas')?`<div class="card" style="margin-bottom:16px">
+          <div class="section-head"><span class="section-title">Letzte Gespräche</span><button class="btn btn-sm" onclick="showView('bilas')">Alle →</button></div>
+          ${recentBilas.length===0?'<div class="empty" style="padding:20px 0">Noch keine Gespräche</div>':
+          recentBilas.map(b=>{
+            const m = getMember(b.memberId);
+            const gi = state.members.indexOf(m);
+            return `<div class="bila-entry" onclick="openBilaDetail(${b.id})">
+              <div class="bila-meta">
+                ${m?`<div class="avatar-sm ${avatarColor(gi)}" style="width:22px;height:22px;font-size:9px">${initials(m.name)}</div><span style="font-size:12px;font-weight:500">${m.name}</span>`:''}
+                <span class="bila-date">${fmtDate(b.date)}</span>
+                <span class="tag blue" style="margin-left:auto">${b.type||'BILA'}</span>
+              </div>
+              <div class="bila-preview">${b.notes||'Keine Notizen'}</div>
+            </div>`;
+          }).join('')}
+        </div>`:''}
+        <div class="card">
+          <div class="section-head"><span class="section-title">Team-Übersicht</span>${state.teams.length>1?`<button class="btn btn-sm" onclick="openTeamModal(${currentTeamId||''})">${currentTeamId?'Team bearbeiten':'Teams verwalten'}</button>`:''}</div>
+          ${members.length===0?`<div class="empty" style="padding:20px 0">Noch keine Mitglieder.<br><button class="btn btn-primary btn-sm" onclick="openAddMemberModal()" style="margin-top:10px">Erstes Mitglied anlegen</button></div>`:
+          members.map((m,i)=>{
+            const gi = state.members.indexOf(m);
+            const mb = bilas.filter(b=>b.memberId===m.id);
+            const mt = tasks.filter(t=>t.assignee===m.id&&t.status!=='Erledigt');
+            const lastBila = [...mb].sort((a,b)=>b.date.localeCompare(a.date))[0];
+            const multiTeam = (m.teamIds||[]).length > 1;
+            return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f5;cursor:pointer" onclick="openMember(${m.id})">
+              <div class="avatar-sm ${avatarColor(gi)}">${initials(m.name)}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:500">${m.name}${multiTeam?`<span class="multi-team-badge">Multi-Team</span>`:''}</div>
+                <div style="font-size:11px;color:var(--muted)">${m.role||'–'} · ${lastBila?fmtDate(lastBila.date):'kein BILA'}</div>
+              </div>
+              ${mt.length>0?`<span class="badge badge-amber">${mt.length}</span>`:''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    ${modEnabled('devgoals') ? `
+    <div class="card" style="margin-top:16px">
+      <div class="section-head">
+        <span class="section-title">🎯 Entwicklungsziele – Übersicht</span>
+        <button class="btn btn-sm" onclick="showView('devgoals')">Alle →</button>
+      </div>
+      ${(()=>{
+        const allGoals = [];
+        members.forEach(m => (m.devGoals||[]).forEach(g => allGoals.push({...g, memberId:m.id, memberName:m.name, memberIdx:state.members.indexOf(m)})));
+        const open = allGoals.filter(g=>!g.achieved);
+        const overdue = open.filter(g=>g.endDate&&isOverdue(g.endDate));
+        const recentAchieved = allGoals.filter(g=>g.achieved&&g.achievedDate).sort((a,b)=>(b.achievedDate||'').localeCompare(a.achievedDate||'')).slice(0,3);
+        const urgent = open.filter(g=>g.endDate&&!isOverdue(g.endDate)&&g.endDate<=new Date(Date.now()+30*864e5).toISOString().slice(0,10)).sort((a,b)=>a.endDate.localeCompare(b.endDate));
+
+        if (!allGoals.length) return '<div style="color:var(--muted);font-size:13px">Noch keine Entwicklungsziele erfasst.</div>';
+
+        let html = '<div class="metric-grid" style="margin-bottom:14px">'
+          + '<div class="metric"><div class="metric-label">Gesamt</div><div class="metric-val">' + allGoals.length + '</div></div>'
+          + '<div class="metric"><div class="metric-label">Offen</div><div class="metric-val ' + (open.length?'warn':'') + '">' + open.length + '</div></div>'
+          + '<div class="metric"><div class="metric-label">Erreicht</div><div class="metric-val good">' + allGoals.filter(g=>g.achieved).length + '</div></div>'
+          + '<div class="metric"><div class="metric-label">Überfällig</div><div class="metric-val ' + (overdue.length?'bad':'') + '">' + overdue.length + '</div></div>'
+          + '</div>';
+
+        if (urgent.length) {
+          html += '<div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Fällig in 30 Tagen</div>';
+          html += urgent.slice(0,4).map(g => {
+            const daysLeft = Math.round((new Date(g.endDate)-new Date())/864e5);
+            return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0f2f5;cursor:pointer" onclick="openMember(' + g.memberId + ')">'
+              + '<div class="avatar-sm ' + avatarColor(g.memberIdx) + '" style="width:22px;height:22px;font-size:9px">' + initials(g.memberName) + '</div>'
+              + '<div style="flex:1;min-width:0"><div style="font-size:13px">' + g.goal + '</div>'
+              + '<div style="font-size:11px;color:var(--muted)">' + g.memberName + ' · in ' + daysLeft + ' Tagen</div></div>'
+              + '<span class="badge ' + (daysLeft<=7?'badge-red':'badge-amber') + '">' + fmtDate(g.endDate) + '</span>'
+              + '</div>';
+          }).join('');
+        }
+
+        if (overdue.length) {
+          html += '<div style="font-size:12px;font-weight:600;color:var(--danger);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 8px">Überfällig</div>';
+          html += overdue.slice(0,3).map(g =>
+            '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0f2f5;cursor:pointer" onclick="openMember(' + g.memberId + ')">'
+            + '<div class="avatar-sm ' + avatarColor(g.memberIdx) + '" style="width:22px;height:22px;font-size:9px">' + initials(g.memberName) + '</div>'
+            + '<div style="flex:1;min-width:0"><div style="font-size:13px">' + g.goal + '</div>'
+            + '<div style="font-size:11px;color:var(--muted)">' + g.memberName + '</div></div>'
+            + '<span class="badge badge-red">seit ' + fmtDate(g.endDate) + '</span>'
+            + '</div>'
+          ).join('');
+        }
+
+        if (recentAchieved.length) {
+          html += '<div style="font-size:12px;font-weight:600;color:var(--success);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 8px">Zuletzt erreicht</div>';
+          html += recentAchieved.map(g =>
+            '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0f2f5">'
+            + '<div class="avatar-sm ' + avatarColor(g.memberIdx) + '" style="width:22px;height:22px;font-size:9px">' + initials(g.memberName) + '</div>'
+            + '<div style="flex:1;min-width:0"><div style="font-size:13px;text-decoration:line-through;color:var(--muted)">' + g.goal + '</div>'
+            + '<div style="font-size:11px;color:var(--muted)">' + g.memberName + (g.achievedDate?' · ✓ '+fmtDate(g.achievedDate):'') + '</div></div>'
+            + '<span class="badge badge-green">✓</span>'
+            + '</div>'
+          ).join('');
+        }
+
+        return html;
+      })()}
+    </div>` : ''}
+  `;
+}
+
+function analyzeRisks() {
+  const members = activeTeamMembers();
+  const bilas = activeTeamBilas();
+  const tasks = activeTeamTasks();
+  const risks = [];
+  members.forEach(m=>{
+    const mb = bilas.filter(b=>b.memberId===m.id).sort((a,b)=>b.date.localeCompare(a.date));
+    if (!mb.length) risks.push({level:'amber',text:`${m.name}: Noch kein Gespräch dokumentiert`,sub:'BILA planen'});
+    else {
+      const days = Math.round((new Date()-new Date(mb[0].date))/(864e5));
+      if (days>28) risks.push({level:'amber',text:`${m.name}: Letztes BILA vor ${days} Tagen`,sub:'Regelmäßigkeit prüfen'});
+    }
+  });
+  const od = tasks.filter(t=>t.status!=='Erledigt'&&isOverdue(t.due));
+  if (od.length) risks.push({level:'red',text:`${od.length} überfällige Aufgabe(n)`,sub:od.map(t=>t.title).slice(0,2).join(', ')});
+  const tagFreq = {};
+  bilas.forEach(b=>(b.tags||[]).forEach(tag=>{tagFreq[tag]=(tagFreq[tag]||0)+1}));
+  if ((tagFreq['Konflikt']||0)>=2) risks.push({level:'red',text:'Konflikt: häufig erwähnt',sub:`${tagFreq['Konflikt']}× in Gesprächen`});
+  if ((tagFreq['Blocker']||0)>=3) risks.push({level:'amber',text:'Blocker: wiederkehrendes Thema',sub:`${tagFreq['Blocker']}× dokumentiert`});
+  if ((tagFreq['Motivation']||0)>=2) risks.push({level:'green',text:'Motivation: aktives Thema',sub:`${tagFreq['Motivation']}× besprochen`});
+  return risks.slice(0,5);
+}
+
+// ============================================================
+// MEMBER VIEW
+// ============================================================
+function renderMemberView(id) {
+  const m = getMember(id);
+  if (!m) return;
+  const gi = state.members.indexOf(m);
+  const memberBilas = activeTeamBilas().filter(b=>b.memberId===id).sort((a,b)=>b.date.localeCompare(a.date));
+  const memberTasks = activeTeamTasks().filter(t=>t.assignee===id);
+
+  // Calculate age if birthday known
+  let ageStr = '';
+  if (m.birthday) {
+    const age = Math.floor((new Date() - new Date(m.birthday)) / (365.25*24*3600*1000));
+    ageStr = ` · ${age} Jahre`;
+  }
+  // Next birthday
+  let birthdayStr = '';
+  if (m.birthday) {
+    const today_ = new Date();
+    const bd = new Date(m.birthday);
+    const nextBd = new Date(today_.getFullYear(), bd.getMonth(), bd.getDate());
+    if (nextBd < today_) nextBd.setFullYear(today_.getFullYear()+1);
+    const days = Math.round((nextBd - today_) / (864e5));
+    birthdayStr = days <= 30 ? ` 🎂 in ${days} Tagen` : '';
+  }
+
+  document.getElementById('topbar-actions').innerHTML = `
+    <span id="sync-status"></span>
+    <button class="btn btn-primary btn-sm" onclick="openNewBilaModal(${id})">+ Gespräch</button>
+    <button class="btn btn-sm" onclick="openNewTaskModal(${id})">+ Aufgabe</button>
+    <button class="btn btn-sm" onclick="editMember(${id})">&#9998; Bearbeiten</button>
+  `;
+
+  document.getElementById('content').innerHTML = `
+    <div class="profile-header">
+      <div class="avatar-lg ${avatarColor(gi)}">${initials(m.name)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:18px;font-weight:600">${m.name}${birthdayStr}</div>
+        <div style="font-size:13px;color:var(--muted)">${m.role||'Keine Rolle'}${m.since?' · seit '+fmtDate(m.since):''}${ageStr}</div>
+        ${(m.teamIds||[]).length?`<div style="margin-top:4px">${(m.teamIds).map(tid=>`<span class="team-chip">${(getTeam(tid)||{}).name||'?'}</span>`).join('')}</div>`:''}
+        <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px">
+          ${m.email?`<span style="font-size:12px;color:var(--muted)">✉ ${m.email}</span>`:''}
+          ${m.phoneWork?`<span style="font-size:12px;color:var(--muted)">📞 ${m.phoneWork}</span>`:''}
+          ${m.phonePrivate?`<span style="font-size:12px;color:var(--muted)">📱 ${m.phonePrivate}</span>`:''}
+          ${m.location?`<span style="font-size:12px;color:var(--muted)">📍 ${m.location}</span>`:''}
+          ${m.languages?`<span style="font-size:12px;color:var(--muted)">🌐 ${m.languages}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="metric" style="min-width:65px;text-align:center"><div class="metric-label">BILAs</div><div class="metric-val" style="font-size:18px">${memberBilas.length}</div></div>
+        <div class="metric" style="min-width:65px;text-align:center"><div class="metric-label">Offen</div><div class="metric-val ${memberTasks.filter(t=>t.status!=='Erledigt').length>0?'warn':''}" style="font-size:18px">${memberTasks.filter(t=>t.status!=='Erledigt').length}</div></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab ${selectedMemberTab==='bilas'?'active':''}" onclick="setMemberTab('bilas')">Gespräche (${memberBilas.length})</div>
+      <div class="tab ${selectedMemberTab==='tasks'?'active':''}" onclick="setMemberTab('tasks')">Aufgaben (${memberTasks.length})</div>
+      <div class="tab ${selectedMemberTab==='dev'?'active':''}" onclick="setMemberTab('dev')">Entwicklung</div>
+      <div class="tab ${selectedMemberTab==='memberfeedback'?'active':''}" onclick="setMemberTab('memberfeedback')">Feedback</div>
+      <div class="tab ${selectedMemberTab==='profile'?'active':''}" onclick="setMemberTab('profile')">Profil</div>
+    </div>
+    <div id="member-tab-content"></div>
+  `;
+  renderMemberTab(id);
+}
+
+function setMemberTab(tab) {
+  selectedMemberTab = tab;
+  document.querySelectorAll('.tabs .tab').forEach(el=>{
+    const txt = el.textContent.trim();
+    const match =
+      (tab==='bilas'         && txt.startsWith('Gesp')) ||
+      (tab==='tasks'         && txt.startsWith('Aufg')) ||
+      (tab==='dev'           && txt.startsWith('Entw')) ||
+      (tab==='memberfeedback'&& txt.startsWith('Feed')) ||
+      (tab==='profile'       && txt.startsWith('Prof'));
+    el.classList.toggle('active', match);
+  });
+  renderMemberTab(selectedMember);
+}
+
+function renderMemberTab(id) {
+  const m = getMember(id);
+  const memberBilas = activeTeamBilas().filter(b=>b.memberId===id).sort((a,b)=>b.date.localeCompare(a.date));
+  const memberTasks = activeTeamTasks().filter(t=>t.assignee===id);
+  const cont = document.getElementById('member-tab-content');
+  if (!cont) return;
+
+  if (selectedMemberTab==='bilas') {
+    cont.innerHTML = `
+      <div class="filter-bar">
+        <div style="flex:1;min-width:150px">
+          <label class="fl">Typ</label>
+          <select id="mbt-type" onchange="applyMemberBilaFilter(${id})" style="padding:5px 8px;font-size:12px">
+            <option value="">Alle</option>
+            ${BILA_TYPES.map(t=>`<option>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex:1;min-width:120px">
+          <label class="fl">Von</label>
+          <input type="date" id="mbt-from" onchange="applyMemberBilaFilter(${id})" style="padding:5px 8px;font-size:12px">
+        </div>
+        <div style="flex:1;min-width:120px">
+          <label class="fl">Bis</label>
+          <input type="date" id="mbt-to" onchange="applyMemberBilaFilter(${id})" style="padding:5px 8px;font-size:12px">
+        </div>
+        <button class="btn btn-sm" onclick="clearMemberBilaFilter(${id})">&#10005;</button>
+      </div>
+      <div id="mbt-bilas-list">${renderMemberBilaList(memberBilas)}</div>`;
+
+  } else if (selectedMemberTab==='tasks') {
+    cont.innerHTML = `
+      <div class="filter-bar">
+        <div style="flex:1;min-width:120px">
+          <label class="fl">Priorit\u00e4t</label>
+          <select id="mtt-prio" onchange="applyMemberTaskFilter(${id})" style="padding:5px 8px;font-size:12px">
+            <option value="">Alle</option>
+            <option>Hoch</option><option>Mittel</option><option>Niedrig</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:130px">
+          <label class="fl">Status</label>
+          <select id="mtt-status" onchange="applyMemberTaskFilter(${id})" style="padding:5px 8px;font-size:12px">
+            <option value="">Alle</option>
+            <option>Offen</option><option>In Bearbeitung</option><option>Blockiert</option><option>Erledigt</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:120px">
+          <label class="fl">F\u00e4llig bis</label>
+          <input type="date" id="mtt-due" onchange="applyMemberTaskFilter(${id})" style="padding:5px 8px;font-size:12px">
+        </div>
+        <button class="btn btn-sm" onclick="clearMemberTaskFilter(${id})">&#10005;</button>
+      </div>
+      <div id="mtt-tasks-list">${renderMemberTaskList(memberTasks, id)}</div>`;
+
+  } else if (selectedMemberTab==='dev') {
+    const devGoals = m.devGoals||[];
+    cont.innerHTML = `
+      <div class="filter-bar">
+        <div style="flex:1;min-width:130px">
+          <label class="fl">Kategorie</label>
+          <select id="dgt-cat" onchange="applyDevGoalFilter(${id})" style="padding:5px 8px;font-size:12px">
+            <option value="">Alle</option>
+            ${['Fachlich','F\u00fchrung','Kommunikation','Soft Skills','Zertifizierung','Karriere','Pers\u00f6nlich'].map(c=>`<option>${c}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex:1;min-width:110px">
+          <label class="fl">Status</label>
+          <select id="dgt-status" onchange="applyDevGoalFilter(${id})" style="padding:5px 8px;font-size:12px">
+            <option value="">Alle</option>
+            <option value="open">Offen</option>
+            <option value="achieved">Erreicht</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:120px">
+          <label class="fl">Priorit\u00e4t</label>
+          <select id="dgt-prio" onchange="applyDevGoalFilter(${id})" style="padding:5px 8px;font-size:12px">
+            <option value="">Alle</option>
+            <option>Hoch</option><option>Mittel</option><option>Niedrig</option>
+          </select>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="openDevGoalModal(${id})">+ Neues Ziel</button>
+        <button class="btn btn-sm" onclick="clearDevGoalFilter(${id})">&#10005;</button>
+      </div>
+      <div id="dgt-goals-list">${renderDevGoalList(devGoals, id)}</div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">H\u00e4ufige Gespr\u00e4chsthemen</div>
+        ${renderTagCloud(id)}
+      </div>`;
+
+  } else if (selectedMemberTab==='memberfeedback') {
+    cont.innerHTML = renderMemberFeedbackTab(id);
+
+  } else if (selectedMemberTab==='profile') {
+    const m2 = getMember(id);
+    function row(label, val) {
+      if (!val) return '';
+      return `<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #f0f2f5"><div style="font-size:12px;color:var(--muted);width:150px;flex-shrink:0;padding-top:1px">${label}</div><div style="font-size:13px;flex:1;word-break:break-word">${val}</div></div>`;
+    }
+    const kids = (m2.children||[]).filter(k=>k.name||k.dob);
+    const kidsStr = kids.map(k=>`${k.name||'\u2013'}${k.dob?' ('+fmtDate(k.dob)+')':''}`).join(', ');
+    cont.innerHTML = `
+      <div class="grid2" style="gap:16px">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title">Pers\u00f6nliches</div>
+            ${row('Geburtstag', m2.birthday ? fmtDate(m2.birthday) : '')}
+            ${row('Nationalit\u00e4t', m2.nationality)}
+            ${row('Wohnort', m2.location)}
+            ${row('Sprachen', m2.languages)}
+            ${row('Tel. gesch\u00e4ftlich', m2.phoneWork)}
+            ${row('Tel. privat', m2.phonePrivate)}
+            ${(m2.emergencyContacts||[]).filter(ec=>ec.name||ec.phone).length ? `<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #f0f2f5"><div style="font-size:12px;color:var(--muted);width:150px;flex-shrink:0">Notfallkontakte</div><div style="font-size:13px;flex:1">${(m2.emergencyContacts).filter(ec=>ec.name||ec.phone).map(ec=>`<div style="margin-bottom:3px">\u{1F6A8} <strong>${ec.name||'\u2013'}</strong>${ec.rel?' ('+ec.rel+')':''} ${ec.phone?'\u00b7 '+ec.phone:''}</div>`).join('')}</div></div>` : ''}
+            ${row('Familienstand', m2.familyStatus)}
+            ${row('Kinder', kidsStr)}
+            ${row('Hobbys', m2.hobbies)}
+            ${row('Motivation', m2.motivation)}
+            ${row('Kommunikation', m2.commStyle)}
+            ${row('Umgang Feedback', m2.feedbackStyle)}
+            ${row('Besonderheiten', m2.special)}
+          </div>
+          ${m2.notes?`<div class="card"><div class="card-title">Kurznotiz</div><div style="font-size:13px;color:var(--muted)">${m2.notes}</div></div>`:''}
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title">Berufliches</div>
+            ${row('Pensum / Vertrag', m2.contract)}
+            ${row('Arbeitsstil', m2.workstyle)}
+            ${row('Skills', m2.skills)}
+            ${row('Zertifizierungen', m2.certs)}
+            ${row('St\u00e4rken', m2.strengths)}
+            ${row('Entwicklungsfelder', m2.growthFields)}
+            ${row('Karriereziele', m2.career)}
+          </div>
+          ${m2.confidential?`<div class="card" style="border-color:var(--warn)"><div class="card-title" style="color:var(--warn)">&#128274; Vertrauliche Notizen</div><div style="font-size:13px;white-space:pre-wrap">${m2.confidential}</div></div>`:''}
+        </div>
+      </div>
+      <div style="margin-top:12px"><button class="btn btn-sm" onclick="editMember(${id})">&#9998; Alle Felder bearbeiten</button></div>`;
+  }
+}
+
+function renderMemberBilaList(bilas) {
+  if (!bilas.length) return '<div class="empty">Keine Gespr\u00e4che gefunden</div>';
+  return bilas.map(b=>`<div class="bila-entry" onclick="openBilaDetail(${b.id})">
+    <div class="bila-meta">
+      <span class="bila-date">${fmtDate(b.date)}</span>
+      <span class="tag blue">${b.type||'BILA'}</span>
+      <span class="${confClass(b.conf)} conf-badge" style="margin-left:auto">${b.conf||'Standard'}</span>
+    </div>
+    <div style="font-size:13px;margin-bottom:3px">${b.subject||'Ohne Betreff'}</div>
+    <div class="bila-preview">${b.notes||'\u2013'}</div>
+    ${b.tags&&b.tags.length?`<div style="margin-top:6px">${b.tags.map(t=>`<span class="tag">${t}</span>`).join(' ')}</div>`:''}
+  </div>`).join('');
+}
+
+function applyMemberBilaFilter(id) {
+  const type = document.getElementById('mbt-type')?.value||'';
+  const from = document.getElementById('mbt-from')?.value||'';
+  const to   = document.getElementById('mbt-to')?.value||'';
+  let bilas = activeTeamBilas().filter(b=>b.memberId===id);
+  if (type) bilas = bilas.filter(b=>(b.type||'')===type);
+  if (from) bilas = bilas.filter(b=>b.date>=from);
+  if (to)   bilas = bilas.filter(b=>b.date<=to);
+  bilas.sort((a,b)=>b.date.localeCompare(a.date));
+  const c = document.getElementById('mbt-bilas-list');
+  if (c) c.innerHTML = renderMemberBilaList(bilas);
+}
+
+function clearMemberBilaFilter(id) {
+  ['mbt-type','mbt-from','mbt-to'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  applyMemberBilaFilter(id);
+}
+
+function renderMemberTaskList(tasks, memberId) {
+  function taskRow(t, isDone) {
+    return `<div class="task-item">
+      <div class="task-check ${isDone?'done':''}" onclick="toggleTask(${t.id});renderMemberTab(${memberId})">
+        ${isDone?'<svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+      </div>
+      <div class="task-body">
+        <div class="task-title ${isDone?'done':''}">${t.title}</div>
+        <div class="task-meta">
+          <span class="${isOverdue(t.due)&&!isDone?'overdue':''}">${t.due?fmtDate(t.due):''}</span>
+          <span class="badge ${t.priority==='Hoch'?'badge-red':t.priority==='Mittel'?'badge-amber':'badge-gray'}">${t.priority}</span>
+          <span class="badge badge-blue">${t.status||'Offen'}</span>
+        </div>
+        ${t.desc?`<div style="font-size:12px;color:var(--muted);margin-top:3px">${t.desc}</div>`:''}
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="btn btn-sm" onclick="editTask(${t.id})">&#9998;</button>
+        <button class="btn btn-sm" onclick="duplicateTask(${t.id})" style="color:var(--accent);border-color:var(--accent)">&#11035;</button>
+        <button class="btn btn-sm" onclick="deleteTask(${t.id})" style="color:var(--danger);border-color:var(--danger)">&#215;</button>
+      </div>
+    </div>`;
+  }
+  const open = tasks.filter(t=>t.status!=='Erledigt');
+  const done = tasks.filter(t=>t.status==='Erledigt');
+  return `
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title">Offen (${open.length})</div>
+      ${open.length===0?'<div style="color:var(--muted);font-size:13px">Keine offenen Aufgaben</div>':open.map(t=>taskRow(t,false)).join('')}
+    </div>
+    ${done.length?`<div class="card"><div class="card-title" style="color:var(--muted)">Erledigt (${done.length})</div>${done.map(t=>taskRow(t,true)).join('')}</div>`:''}`;
+}
+
+function applyMemberTaskFilter(id) {
+  const prio   = document.getElementById('mtt-prio')?.value||'';
+  const status = document.getElementById('mtt-status')?.value||'';
+  const due    = document.getElementById('mtt-due')?.value||'';
+  let tasks = activeTeamTasks().filter(t=>t.assignee===id);
+  if (prio)   tasks = tasks.filter(t=>t.priority===prio);
+  if (status) tasks = tasks.filter(t=>(t.status||'Offen')===status);
+  if (due)    tasks = tasks.filter(t=>t.due&&t.due<=due);
+  const c = document.getElementById('mtt-tasks-list');
+  if (c) c.innerHTML = renderMemberTaskList(tasks, id);
+}
+
+function clearMemberTaskFilter(id) {
+  ['mtt-prio','mtt-status','mtt-due'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  applyMemberTaskFilter(id);
+}
+
+function renderDevGoalList(goals, memberId) {
+  const prio   = document.getElementById('dgt-prio')?.value||'';
+  const cat    = document.getElementById('dgt-cat')?.value||'';
+  const status = document.getElementById('dgt-status')?.value||'';
+  let filtered = [...goals];
+  if (cat)               filtered = filtered.filter(g=>(g.category||'')===cat);
+  if (prio)              filtered = filtered.filter(g=>(g.priority||'')===prio);
+  if (status==='open')   filtered = filtered.filter(g=>!g.achieved);
+  if (status==='achieved') filtered = filtered.filter(g=>g.achieved);
+  if (!filtered.length) return '<div class="empty" style="padding:20px 0">Keine Ziele gefunden</div>';
+  const open = filtered.filter(g=>!g.achieved);
+  const done = filtered.filter(g=>g.achieved);
+  return `
+    ${open.map(g=>renderGoalCard(g,memberId)).join('')}
+    ${done.length?`<div style="margin-top:16px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Erreicht (${done.length})</div>${done.map(g=>renderGoalCard(g,memberId)).join('')}`:''}`;
+}
+
+function applyDevGoalFilter(id) {
+  const m = getMember(id);
+  const c = document.getElementById('dgt-goals-list');
+  if (c) c.innerHTML = renderDevGoalList(m.devGoals||[], id);
+}
+
+function clearDevGoalFilter(id) {
+  ['dgt-cat','dgt-status','dgt-prio'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  applyDevGoalFilter(id);
+}
+
+
+
+
+function renderMemberFeedbackTab(id) {
+  const received = (state.feedbacks||[]).filter(f=>f.receiverId===id).sort((a,b)=>b.date.localeCompare(a.date));
+  const given    = (state.feedbacks||[]).filter(f=>f.giverId===id).sort((a,b)=>b.date.localeCompare(a.date));
+  function fbCard(f, isReceived) {
+    const other = isReceived ? getMember(f.giverId) : getMember(f.receiverId);
+    const oi = state.members.indexOf(other);
+    const avatar = other ? '<div class="avatar-sm ' + avatarColor(oi) + '" style="width:20px;height:20px;font-size:8px">' + initials(other.name) + '</div><span style="font-size:12px;font-weight:500">' + other.name + '</span>' : '<span style="font-size:12px;color:var(--muted)">' + (isReceived ? 'Extern' : '') + '</span>';
+    const badge = '<span class="badge ' + (f.status==='Besprochen'?'badge-green':f.status==='Pending'?'badge-amber':'badge-gray') + '" style="margin-left:auto">' + (f.status||'&#8211;') + '</span>';
+    const prefix = isReceived ? '' : '<span style="font-size:11px;color:var(--muted)">an </span>';
+    return '<div class="fb-card" onclick="openFeedbackModal(\'' + f.id + '\')">'
+      + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">'
+      + prefix + avatar
+      + '<span class="bila-date">' + fmtDate(f.date) + '</span>' + badge
+      + '</div>'
+      + '<div style="font-size:13px;font-weight:500;margin-bottom:2px">' + (f.subject||'Ohne Betreff') + '</div>'
+      + '<div class="bila-preview">' + (f.content||'&#8211;') + '</div>'
+      + '</div>';
+  }
+  return '<div class="grid2" style="gap:16px">'
+    + '<div>'
+    + '<div class="section-head" style="margin-bottom:10px"><span class="section-title">Erhalten (' + received.length + ')</span><button class="btn btn-primary btn-sm" onclick="openFeedbackModal()">+ Feedback geben</button></div>'
+    + (received.length===0 ? '<div class="empty" style="padding:20px 0">Noch kein Feedback erhalten</div>' : received.map(f=>fbCard(f,true)).join(''))
+    + '</div>'
+    + '<div>'
+    + '<div class="section-head" style="margin-bottom:10px"><span class="section-title">Gegeben (' + given.length + ')</span></div>'
+    + (given.length===0 ? '<div class="empty" style="padding:20px 0">Noch kein Feedback gegeben</div>' : given.map(f=>fbCard(f,false)).join(''))
+    + '</div></div>';
+}
+
+function renderTagCloud(memberId) {
+  const freq = {};
+  activeTeamBilas().filter(b=>b.memberId===memberId).forEach(b=>(b.tags||[]).forEach(t=>{freq[t]=(freq[t]||0)+1}));
+  const entries = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  if (!entries.length) return '<div style="color:var(--muted);font-size:13px">Noch keine Tags</div>';
+  const colors = TAG_COLORS.filter(c=>c);
+  return `<div style="display:flex;flex-wrap:wrap;gap:6px">${entries.map(([tag,cnt],i)=>`<span class="tag ${colors[i%colors.length]}">${tag} <span style="opacity:.7">${cnt}</span></span>`).join('')}</div>`;
+}
+
+// ============================================================
+// DEV GOALS — Rich modal system
+// ============================================================
+function renderGoalCard(g, memberId) {
+  const gid = g.id;
+  const progress = g.subtasks&&g.subtasks.length ? Math.round(g.subtasks.filter(s=>s.done).length/g.subtasks.length*100) : null;
+  const stars = g.stars||0;
+  const starHTML = [1,2,3,4,5].map(i=>`<span class="star ${i<=stars?'on':''}" style="font-size:14px">★</span>`).join('');
+  return `<div class="goal-card ${g.achieved?'opacity:.7':''}">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:600${g.achieved?';text-decoration:line-through;color:var(--muted)':''}">${g.goal}</span>
+          ${g.category?`<span class="tag blue" style="font-size:10px">${g.category}</span>`:''}
+          ${g.achieved?`<span class="badge badge-green">✓ Erreicht</span>`:''}
+          ${g.priority?`<span class="badge ${g.priority==='Hoch'?'badge-red':g.priority==='Mittel'?'badge-amber':'badge-gray'}">${g.priority}</span>`:''}
+        </div>
+        ${g.description?`<div style="font-size:12px;color:var(--muted);margin-top:3px">${g.description}</div>`:''}
+        <div style="display:flex;gap:12px;margin-top:5px;flex-wrap:wrap">
+          ${g.startDate?`<span style="font-size:11px;color:var(--muted)">▶ ${fmtDate(g.startDate)}</span>`:''}
+          ${g.endDate?`<span style="font-size:11px;color:${isOverdue(g.endDate)&&!g.achieved?'var(--danger)':'var(--muted)'}">⏰ ${fmtDate(g.endDate)}</span>`:''}
+          ${g.subtasks&&g.subtasks.length?`<span style="font-size:11px;color:var(--muted)">${g.subtasks.filter(s=>s.done).length}/${g.subtasks.length} Subtasks</span>`:''}
+          ${g.achieved&&stars?`<span style="font-size:11px">${starHTML}</span>`:''}
+        </div>
+        ${progress!==null?`<div class="goal-status-bar" style="margin-top:6px"><div class="goal-status-fill" style="width:${progress}%"></div></div>`:''}
+        ${g.measure?`<div style="font-size:11px;color:var(--muted);margin-top:4px;font-style:italic">📏 ${g.measure}</div>`:''}
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-sm" onclick="openDevGoalModal(${memberId},'${gid}')">&#9998;</button>
+        <button class="btn btn-sm ${g.achieved?'':'btn-primary'}" onclick="toggleGoalAchieved(${memberId},'${gid}')">${g.achieved?'↩':'✓'}</button>
+        <button class="btn btn-sm" onclick="deleteDevGoal(${memberId},'${gid}')" style="color:var(--danger);border-color:var(--danger)">&#215;</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function openDevGoalModal(memberId, goalId) {
+  // If no memberId, show member picker first
+  if (!memberId && !goalId) {
+    const members = activeTeamMembers();
+    if (members.length === 0) { alert('Zuerst ein Teammitglied anlegen.'); return; }
+    if (members.length === 1) { memberId = members[0].id; }
+    else {
+      document.getElementById('devgoal-modal-title').textContent = 'Ziel anlegen – Mitglied wählen';
+      document.getElementById('devgoal-modal-body').innerHTML = `
+        <div class="form-row"><label class="fl">Für wen ist das Ziel?</label>
+          <select id="dg-pick-member" style="font-size:14px;padding:8px">
+            <option value="">– Bitte wählen –</option>
+            ${members.map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-primary" onclick="openDevGoalModal(parseInt(document.getElementById('dg-pick-member').value)||0)">Weiter</button>
+          <button class="btn" onclick="closeOverlay('overlay-devgoal')">Abbrechen</button>
+        </div>`;
+      openOverlay('overlay-devgoal');
+      return;
+    }
+  }
+  if (!memberId) return;
+  const m = getMember(memberId);
+  if (!m) return;
+  const g = goalId ? (m.devGoals||[]).find(g=>g.id===goalId) : null;
+  document.getElementById('devgoal-modal-title').textContent = g ? 'Ziel bearbeiten' : 'Neues Entwicklungsziel';
+  const subs = g ? (g.subtasks||[]) : [];
+  const stars = g ? (g.stars||0) : 0;
+
+  document.getElementById('devgoal-modal-body').innerHTML = `
+    <div class="form-row"><label class="fl">Ziel *</label><input type="text" id="dg-goal" value="${esc(g?g.goal:'')}" placeholder="Was soll erreicht werden?"></div>
+    <div class="form-row"><label class="fl">Beschreibung / Kontext</label><textarea id="dg-desc" rows="2">${g?g.description||'':''}</textarea></div>
+    <div class="form-grid2">
+      <div class="form-row"><label class="fl">Kategorie</label>
+        <select id="dg-cat">
+          ${['','Fachlich','Führung','Kommunikation','Soft Skills','Zertifizierung','Karriere','Persönlich'].map(c=>`<option ${(g?g.category||'':'')===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row"><label class="fl">Priorität</label>
+        <select id="dg-prio">
+          ${['Mittel','Hoch','Niedrig'].map(p=>`<option ${(g?g.priority||'Mittel':'Mittel')===p?'selected':''}>${p}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-grid2">
+      <div class="form-row"><label class="fl">Startdatum</label><input type="date" id="dg-start" value="${g?g.startDate||today():today()}"></div>
+      <div class="form-row"><label class="fl">Zieldatum</label><input type="date" id="dg-end" value="${g?g.endDate||'':''}"></div>
+    </div>
+    <div class="form-row"><label class="fl">📏 Messkriterium – Woran erkennt man Erfolg?</label><textarea id="dg-measure" rows="2" placeholder="z.B. PSM II Prüfung bestanden, 3 Monate eigenständig Module geleitet…">${g?g.measure||'':''}</textarea></div>
+    <div class="form-row"><label class="fl">Ressourcen / Unterstützung</label><input type="text" id="dg-resources" value="${esc(g?g.resources:'')}" placeholder="z.B. Kurs buchen, Mentoring, 20% Zeit freihalten"></div>
+    <div class="form-row"><label class="fl">Review-Termin</label><input type="date" id="dg-review" value="${g?g.reviewDate||'':''}"></div>
+    <div class="form-row">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label class="fl" style="margin:0">Subtasks</label>
+        <button class="btn btn-sm" onclick="addGoalSubtask()">+ Subtask</button>
+      </div>
+      <div id="dg-subtasks">
+        ${subs.map((s,i)=>`<div class="dg-sub-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
+          <input type="checkbox" ${s.done?'checked':''} onchange="updateGoalSub(${i},'done',this.checked)" style="width:14px;height:14px;flex-shrink:0">
+          <input type="text" value="${esc(s.text)}" style="flex:1" oninput="updateGoalSub(${i},'text',this.value)">
+          <button class="btn btn-sm" onclick="removeGoalSub(${i})" style="color:var(--danger);border-color:var(--danger);padding:4px 8px">&#215;</button>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="form-row"><label class="fl">Notizen / Reflexion</label><textarea id="dg-notes" rows="2" placeholder="Lernerkenntnisse, Zwischenstand, nächste Schritte…">${g?g.notes||'':''}</textarea></div>
+    ${g?`<div class="form-row">
+      <label class="fl">Bewertung bei Abschluss</label>
+      <div class="star-row" id="dg-stars">
+        ${[1,2,3,4,5].map(i=>`<span class="star ${i<=stars?'on':''}" onclick="setGoalStars(${i})" data-val="${i}">★</span>`).join('')}
+        <span style="font-size:12px;color:var(--muted);margin-left:6px" id="dg-stars-label">${stars?['','Unzufrieden','Ausbaufähig','Solide','Gut','Ausgezeichnet'][stars]||'':''}</span>
+      </div>
+      <input type="hidden" id="dg-stars-val" value="${stars}">
+    </div>`:''}
+    <div style="display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+      <button class="btn btn-primary" onclick="saveDevGoal(${memberId},'${goalId||''}')">Speichern</button>
+      ${g?`<button class="btn ${g.achieved?'':'btn-primary'}" onclick="toggleGoalAchieved(${memberId},'${goalId}');closeOverlay('overlay-devgoal')">${g.achieved?'Als offen markieren':'✓ Als erreicht markieren'}</button>`:''}
+      ${g?`<button class="btn btn-danger btn-sm" onclick="deleteDevGoal(${memberId},'${goalId}')">Löschen</button>`:''}
+      <button class="btn" onclick="closeOverlay('overlay-devgoal')">Abbrechen</button>
+    </div>
+  `;
+  openOverlay('overlay-devgoal');
+}
+
+let _dgSubs = [];
+function addGoalSubtask() {
+  _dgSubs.push({text:'', done:false});
+  refreshGoalSubs();
+}
+function removeGoalSub(i) { _dgSubs.splice(i,1); refreshGoalSubs(); }
+function updateGoalSub(i, field, val) { if(_dgSubs[i]) _dgSubs[i][field]=val; }
+function refreshGoalSubs() {
+  const c = document.getElementById('dg-subtasks');
+  if (!c) return;
+  c.innerHTML = _dgSubs.map((s,i)=>`<div class="dg-sub-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
+    <input type="checkbox" ${s.done?'checked':''} onchange="updateGoalSub(${i},'done',this.checked)" style="width:14px;height:14px;flex-shrink:0">
+    <input type="text" value="${esc(s.text)}" style="flex:1" oninput="updateGoalSub(${i},'text',this.value)">
+    <button class="btn btn-sm" onclick="removeGoalSub(${i})" style="color:var(--danger);border-color:var(--danger);padding:4px 8px">&#215;</button>
+  </div>`).join('');
+}
+function setGoalStars(n) {
+  document.getElementById('dg-stars-val').value = n;
+  document.querySelectorAll('#dg-stars .star').forEach((el,i)=>el.classList.toggle('on',i<n));
+  const labels = ['','Unzufrieden','Ausbaufähig','Solide','Gut','Ausgezeichnet'];
+  const lbl = document.getElementById('dg-stars-label');
+  if (lbl) lbl.textContent = labels[n]||'';
+}
+
+function saveDevGoal(memberId, goalId) {
+  const goalText = document.getElementById('dg-goal').value.trim();
+  if (!goalText) { alert('Ziel erforderlich'); return; }
+  const m = getMember(memberId);
+  if (!m.devGoals) m.devGoals = [];
+
+  // collect subtasks from DOM
+  const subEls = document.querySelectorAll('.dg-sub-row');
+  const subtasks = Array.from(subEls).map(row=>{
+    const cb = row.querySelector('input[type=checkbox]');
+    const txt = row.querySelector('input[type=text]');
+    return {done: cb?.checked||false, text: txt?.value||''};
+  }).filter(s=>s.text);
+
+  const data = {
+    goal: goalText,
+    description: document.getElementById('dg-desc')?.value||'',
+    category: document.getElementById('dg-cat')?.value||'',
+    priority: document.getElementById('dg-prio')?.value||'Mittel',
+    startDate: document.getElementById('dg-start')?.value||'',
+    endDate: document.getElementById('dg-end')?.value||'',
+    measure: document.getElementById('dg-measure')?.value||'',
+    resources: document.getElementById('dg-resources')?.value||'',
+    reviewDate: document.getElementById('dg-review')?.value||'',
+    notes: document.getElementById('dg-notes')?.value||'',
+    subtasks,
+    stars: parseInt(document.getElementById('dg-stars-val')?.value||0)||0,
+  };
+
+  if (goalId) {
+    const existing = m.devGoals.find(g=>g.id===goalId);
+    if (existing) Object.assign(existing, data);
+  } else {
+    m.devGoals.push({id:'g'+Date.now(), created:today(), achieved:false, ...data});
+  }
+  save();
+  closeOverlay('overlay-devgoal');
+  renderMemberTab(memberId);
+}
+
+function toggleGoalAchieved(memberId, goalId) {
+  const m = getMember(memberId);
+  const g = (m.devGoals||[]).find(g=>g.id===goalId);
+  if (g) { g.achieved = !g.achieved; if(g.achieved) g.achievedDate=today(); }
+  save();
+  renderMemberTab(memberId);
+}
+
+function deleteDevGoal(memberId, goalId) {
+  if (!confirm('Entwicklungsziel wirklich löschen?')) return;
+  const m = getMember(memberId);
+  m.devGoals = (m.devGoals||[]).filter(g=>g.id!==goalId);
+  save();
+  closeOverlay('overlay-devgoal');
+  if (currentView==='devgoals') renderDevGoalsView();
+  else renderMemberTab(memberId);
+}
+
+// Keep old addDevGoal as alias (unused but prevents errors)
+function addDevGoal(memberId) { openDevGoalModal(memberId); }
+function toggleDevGoal(memberId, idx) {
+  const m = getMember(memberId);
+  if (m&&m.devGoals&&m.devGoals[idx]) {
+    m.devGoals[idx].achieved = !m.devGoals[idx].achieved;
+    save(); renderMemberTab(memberId);
+  }
+}
+
+// ============================================================
+// DEV GOALS GLOBAL VIEW
+// ============================================================
+function renderDevGoalsView() {
+  document.getElementById('topbar-actions').innerHTML = `<span id="sync-status"></span><button class="btn btn-primary btn-sm" onclick="openDevGoalModal()">+ Neues Ziel</button>`;
+
+  const members = activeTeamMembers();
+  const allGoals = [];
+  members.forEach(m => (m.devGoals||[]).forEach(g => allGoals.push({...g, memberId: m.id, memberName: m.name, memberIdx: state.members.indexOf(m)})));
+
+  const open     = allGoals.filter(g=>!g.achieved);
+  const achieved = allGoals.filter(g=>g.achieved);
+  const overdue  = open.filter(g=>g.endDate&&isOverdue(g.endDate));
+
+  document.getElementById('content').innerHTML = `
+    <div class="metric-grid" style="margin-bottom:14px">
+      <div class="metric"><div class="metric-label">Gesamt</div><div class="metric-val">${allGoals.length}</div></div>
+      <div class="metric"><div class="metric-label">Offen</div><div class="metric-val ${open.length?'warn':''}">${open.length}</div></div>
+      <div class="metric"><div class="metric-label">Erreicht</div><div class="metric-val good">${achieved.length}</div></div>
+      <div class="metric"><div class="metric-label">Überfällig</div><div class="metric-val ${overdue.length?'bad':''}">${overdue.length}</div></div>
+    </div>
+
+    <div class="filter-bar">
+      <div style="flex:1;min-width:150px">
+        <label class="fl">Person</label>
+        <select id="dgv-person" onchange="applyDevGoalsViewFilter()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          ${members.map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex:1;min-width:130px">
+        <label class="fl">Kategorie</label>
+        <select id="dgv-cat" onchange="applyDevGoalsViewFilter()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          ${['Fachlich','Führung','Kommunikation','Soft Skills','Zertifizierung','Karriere','Persönlich'].map(c=>`<option>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex:1;min-width:120px">
+        <label class="fl">Status</label>
+        <select id="dgv-status" onchange="applyDevGoalsViewFilter()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          <option value="open">Offen</option>
+          <option value="achieved">Erreicht</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:120px">
+        <label class="fl">Priorität</label>
+        <select id="dgv-prio" onchange="applyDevGoalsViewFilter()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          <option>Hoch</option><option>Mittel</option><option>Niedrig</option>
+        </select>
+      </div>
+      <button class="btn btn-sm" onclick="clearDevGoalsViewFilter()">✕ Zurücksetzen</button>
+    </div>
+
+    <div id="dgv-content">${renderDevGoalsViewList(allGoals)}</div>
+  `;
+}
+
+function getFilteredDevGoalsView() {
+  const members = activeTeamMembers();
+  const allGoals = [];
+  members.forEach(m => (m.devGoals||[]).forEach(g => allGoals.push({...g, memberId: m.id, memberName: m.name, memberIdx: state.members.indexOf(m)})));
+  const person = document.getElementById('dgv-person')?.value||'';
+  const cat    = document.getElementById('dgv-cat')?.value||'';
+  const status = document.getElementById('dgv-status')?.value||'';
+  const prio   = document.getElementById('dgv-prio')?.value||'';
+  let filtered = allGoals;
+  if (person) filtered = filtered.filter(g=>g.memberId==person);
+  if (cat)    filtered = filtered.filter(g=>(g.category||'')===cat);
+  if (prio)   filtered = filtered.filter(g=>(g.priority||'')===prio);
+  if (status==='open')     filtered = filtered.filter(g=>!g.achieved);
+  if (status==='achieved') filtered = filtered.filter(g=>g.achieved);
+  return filtered;
+}
+
+function renderDevGoalsViewList(goals) {
+  if (!goals.length) return '<div class="empty">Keine Entwicklungsziele gefunden</div>';
+  return goals.map(g => {
+    const progress = g.subtasks&&g.subtasks.length ? Math.round(g.subtasks.filter(s=>s.done).length/g.subtasks.length*100) : null;
+    return `<div class="goal-card">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div class="avatar-sm ${avatarColor(g.memberIdx)}" style="flex-shrink:0;margin-top:2px">${initials(g.memberName)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:600${g.achieved?';text-decoration:line-through;color:var(--muted)':''}">${g.goal}</span>
+            ${g.category?`<span class="tag blue" style="font-size:10px">${g.category}</span>`:''}
+            ${g.achieved?`<span class="badge badge-green">✓ Erreicht</span>`:''}
+            ${g.priority?`<span class="badge ${g.priority==='Hoch'?'badge-red':g.priority==='Mittel'?'badge-amber':'badge-gray'}">${g.priority}</span>`:''}
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${g.memberName}${g.endDate?` · ⏰ ${fmtDate(g.endDate)}`:''}${g.endDate&&!g.achieved&&isOverdue(g.endDate)?` <span style="color:var(--danger)">(überfällig)</span>`:''}</div>
+          ${progress!==null?`<div class="goal-status-bar" style="margin-top:5px"><div class="goal-status-fill" style="width:${progress}%"></div></div>`:''}
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <button class="btn btn-sm" onclick="openDevGoalModal(${g.memberId},'${g.id}')">&#9998;</button>
+          <button class="btn btn-sm ${g.achieved?'':'btn-primary'}" onclick="toggleGoalAchieved(${g.memberId},'${g.id}');renderDevGoalsView()">${g.achieved?'↩':'✓'}</button>
+          <button class="btn btn-sm" onclick="deleteDevGoal(${g.memberId},'${g.id}')" style="color:var(--danger);border-color:var(--danger)">&#215;</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function applyDevGoalsViewFilter() {
+  const c = document.getElementById('dgv-content');
+  if (c) c.innerHTML = renderDevGoalsViewList(getFilteredDevGoalsView());
+}
+
+function clearDevGoalsViewFilter() {
+  ['dgv-person','dgv-cat','dgv-status','dgv-prio'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  applyDevGoalsViewFilter();
+}
+
+// ============================================================
+// FEEDBACK TRACKING
+// ============================================================
+function renderFeedbackView() {
+  document.getElementById('topbar-actions').innerHTML = `<span id="sync-status"></span><button class="btn btn-primary btn-sm" onclick="openFeedbackModal()">+ Feedback erfassen</button>`;
+  const feedbacks = state.feedbacks||[];
+
+  document.getElementById('content').innerHTML = `
+    <div class="metric-grid" style="margin-bottom:14px">
+      <div class="metric"><div class="metric-label">Gesamt</div><div class="metric-val">${feedbacks.length}</div></div>
+      <div class="metric"><div class="metric-label">Diesen Monat</div><div class="metric-val">${feedbacks.filter(f=>f.date&&f.date.startsWith(new Date().toISOString().slice(0,7))).length}</div></div>
+      <div class="metric"><div class="metric-label">Pending</div><div class="metric-val warn">${feedbacks.filter(f=>f.status==='Pending').length}</div></div>
+      <div class="metric"><div class="metric-label">Abgeschlossen</div><div class="metric-val good">${feedbacks.filter(f=>f.status==='Abgeschlossen').length}</div></div>
+    </div>
+
+    <div class="filter-bar">
+      <div style="flex:1;min-width:150px">
+        <label class="fl">Geber</label>
+        <select id="ff-giver" onchange="applyFeedbackFilters()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          ${activeTeamMembers().map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <label class="fl">Empfänger</label>
+        <select id="ff-receiver" onchange="applyFeedbackFilters()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          ${activeTeamMembers().map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex:1;min-width:140px">
+        <label class="fl">Status</label>
+        <select id="ff-status" onchange="applyFeedbackFilters()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          <option>Pending</option><option>Besprochen</option><option>In Umsetzung</option><option>Abgeschlossen</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:130px">
+        <label class="fl">Von</label>
+        <input type="date" id="ff-from" onchange="applyFeedbackFilters()" style="padding:6px 8px;font-size:12px">
+      </div>
+      <div style="flex:1;min-width:130px">
+        <label class="fl">Bis</label>
+        <input type="date" id="ff-to" onchange="applyFeedbackFilters()" style="padding:6px 8px;font-size:12px">
+      </div>
+      <button class="btn btn-sm" onclick="clearFeedbackFilters()">&#10005; Zurücksetzen</button>
+    </div>
+
+    <div id="feedbacks-content">${renderFeedbackList(getFilteredFeedbacks())}</div>
+  `;
+}
+
+function getFilteredFeedbacks(searchQ) {
+  let fbs = [...(state.feedbacks||[])];
+  const giver    = document.getElementById('ff-giver')?.value||'';
+  const receiver = document.getElementById('ff-receiver')?.value||'';
+  const status   = document.getElementById('ff-status')?.value||'';
+  const from     = document.getElementById('ff-from')?.value||'';
+  const to       = document.getElementById('ff-to')?.value||'';
+  const lq       = (searchQ||'').toLowerCase();
+  if (giver)    fbs = fbs.filter(f=>f.giverId==giver);
+  if (receiver) fbs = fbs.filter(f=>f.receiverId==receiver);
+  if (status)   fbs = fbs.filter(f=>(f.status||'')=== status);
+  if (from)     fbs = fbs.filter(f=>f.date>=from);
+  if (to)       fbs = fbs.filter(f=>f.date<=to);
+  if (lq)       fbs = fbs.filter(f=>{
+    const g = getMember(f.giverId), r = getMember(f.receiverId);
+    return (f.subject||'').toLowerCase().includes(lq)||(f.content||'').toLowerCase().includes(lq)||
+      (g&&g.name.toLowerCase().includes(lq))||(r&&r.name.toLowerCase().includes(lq));
+  });
+  return fbs.sort((a,b)=>b.date.localeCompare(a.date));
+}
+
+function applyFeedbackFilters() {
+  const c = document.getElementById('feedbacks-content');
+  if (c) c.innerHTML = renderFeedbackList(getFilteredFeedbacks());
+}
+
+function clearFeedbackFilters() {
+  ['ff-giver','ff-receiver','ff-status','ff-from','ff-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  applyFeedbackFilters();
+}
+
+function filterFeedbacks(q) {
+  const c = document.getElementById('feedbacks-content');
+  if (c) c.innerHTML = renderFeedbackList(getFilteredFeedbacks(q));
+}
+
+function renderFeedbackList(feedbacks) {
+  if (!feedbacks.length) return '<div class="empty">Noch kein Feedback erfasst</div>';
+  return feedbacks.map(f=>{
+    const giver = getMember(f.giverId);
+    const receiver = getMember(f.receiverId);
+    const giverGi = state.members.indexOf(giver);
+    const receiverGi = state.members.indexOf(receiver);
+    return `<div class="fb-card" onclick="openFeedbackModal('${f.id}')">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+        ${giver?`<div style="display:flex;align-items:center;gap:5px"><div class="avatar-sm ${avatarColor(giverGi)}" style="width:22px;height:22px;font-size:9px">${initials(giver.name)}</div><span style="font-size:12px;font-weight:500">${giver.name}</span></div>`:'<span style="font-size:12px;color:var(--muted)">Extern</span>'}
+        <span style="font-size:13px;color:var(--muted)">&#8594;</span>
+        ${receiver?`<div style="display:flex;align-items:center;gap:5px"><div class="avatar-sm ${avatarColor(receiverGi)}" style="width:22px;height:22px;font-size:9px">${initials(receiver.name)}</div><span style="font-size:12px;font-weight:500">${receiver.name}</span></div>`:''}
+        <span class="bila-date" style="margin-left:4px">${fmtDate(f.date)}</span>
+        <span class="badge ${f.status==='Besprochen'?'badge-green':f.status==='Pending'?'badge-amber':f.status==='In Umsetzung'?'badge-blue':'badge-gray'}" style="margin-left:auto">${f.status||'–'}</span>
+      </div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:2px">${f.subject||'Ohne Betreff'}</div>
+      <div class="bila-preview">${f.content||'–'}</div>
+    </div>`;
+  }).join('');
+}
+
+function openFeedbackModal(editId) {
+  if (!state.feedbacks) state.feedbacks = [];
+  const f = editId ? state.feedbacks.find(fb=>fb.id===editId) : null;
+  document.getElementById('feedback-modal-title').textContent = f ? 'Feedback bearbeiten' : 'Feedback erfassen';
+  const rating = f ? (f.rating||0) : 0;
+
+  document.getElementById('feedback-modal-body').innerHTML = `
+    <div style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--muted)">
+      💡 Wer gibt wem Feedback? Geber → Empfänger tracken für 360°, Peer-Feedback, Lob und Kritik.
+    </div>
+    <div class="form-grid2">
+      <div class="form-row"><label class="fl">Feedback von (Geber)</label>
+        <select id="fbm-giver">
+          <option value="">– Extern / Anonym –</option>
+          ${state.members.map(m=>`<option value="${m.id}" ${f&&f.giverId==m.id?'selected':''}>${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row"><label class="fl">Feedback an (Empfänger) *</label>
+        <select id="fbm-receiver">
+          <option value="">– Bitte wählen –</option>
+          ${state.members.map(m=>`<option value="${m.id}" ${f&&f.receiverId==m.id?'selected':''}>${m.name}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row"><label class="fl">Datum</label><input type="date" id="fbm-date" value="${f?f.date:today()}"></div>
+    <div class="form-row"><label class="fl">Betreff</label><input type="text" id="fbm-subject" value="${esc(f?f.subject:'')}" placeholder="z.B. Sprint 12 Retrospektive, Code Review, Präsentation"></div>
+    <div class="form-row"><label class="fl">Feedback-Inhalt</label><textarea id="fbm-content" rows="4">${f?f.content||'':''}</textarea></div>
+    <div class="form-row"><label class="fl">Stärken (Was lief gut)</label><textarea id="fbm-strengths" rows="2">${f?f.strengths||'':''}</textarea></div>
+    <div class="form-row"><label class="fl">Verbesserungspotential</label><textarea id="fbm-improve" rows="2">${f?f.improve||'':''}</textarea></div>
+    <div class="form-row"><label class="fl">Massnahmen / Nächste Schritte</label><input type="text" id="fbm-actions" value="${esc(f?f.actions:'')}" placeholder="z.B. bis 30.06 Kurs buchen, Folge-BILA einplanen"></div>
+    <div class="form-row"><label class="fl">Status</label>
+      <select id="fbm-status">
+        ${['Pending','Besprochen','In Umsetzung','Abgeschlossen'].map(s=>`<option ${f&&f.status===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+      <button class="btn btn-primary" onclick="saveFeedback('${editId||''}')">Speichern</button>
+      ${f?`<button class="btn btn-danger btn-sm" onclick="deleteFeedback('${editId}')">Löschen</button>`:''}
+      <button class="btn" onclick="closeOverlay('overlay-feedback')">Abbrechen</button>
+    </div>
+  `;
+  openOverlay('overlay-feedback');
+}
+
+function setFbStars(n) {
+  document.getElementById('fbm-stars-val').value = n;
+  document.querySelectorAll('#fbm-stars .star').forEach((el,i)=>el.classList.toggle('on',i<n));
+  const labels = ['','Unzufrieden','Ausbaufähig','Solide','Gut','Ausgezeichnet'];
+  const lbl = document.getElementById('fbm-stars-label');
+  if (lbl) lbl.textContent = labels[n]||'';
+}
+
+function saveFeedback(editId) {
+  if (!state.feedbacks) state.feedbacks = [];
+  const receiverId = document.getElementById('fbm-receiver').value;
+  if (!receiverId) { alert('Empfänger erforderlich'); return; }
+  const data = {
+    giverId: parseInt(document.getElementById('fbm-giver').value)||null,
+    receiverId: parseInt(receiverId),
+    date: document.getElementById('fbm-date').value||today(),
+    subject: document.getElementById('fbm-subject').value,
+    content: document.getElementById('fbm-content').value,
+    strengths: document.getElementById('fbm-strengths').value,
+    improve: document.getElementById('fbm-improve').value,
+    actions: document.getElementById('fbm-actions').value,
+    status: document.getElementById('fbm-status').value,
+  };
+  if (editId) {
+    const existing = state.feedbacks.find(f=>f.id===editId);
+    if (existing) Object.assign(existing, data);
+  } else {
+    state.feedbacks.push({id:'fb'+Date.now(), ...data});
+  }
+  save();
+  closeOverlay('overlay-feedback');
+  if (currentView==='feedback') renderFeedbackView();
+}
+
+function deleteFeedback(id) {
+  if (!confirm('Feedback wirklich löschen?')) return;
+  state.feedbacks = (state.feedbacks||[]).filter(f=>f.id!==id);
+  save();
+  closeOverlay('overlay-feedback');
+  renderFeedbackView();
+}
+
+// ============================================================
+// TASKS VIEW
+// ============================================================
+function renderTasksView() {
+  document.getElementById('topbar-actions').innerHTML = `<span id="sync-status"></span><button class="btn btn-primary btn-sm" onclick="openNewTaskModal()">+ Aufgabe</button>`;
+  document.getElementById('content').innerHTML = `
+    <div class="filter-bar">
+      <div style="flex:1;min-width:140px">
+        <label class="fl">Person</label>
+        <select id="tf-person" onchange="applyTaskFilters()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          ${activeTeamMembers().map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex:1;min-width:130px">
+        <label class="fl">Priorität</label>
+        <select id="tf-prio" onchange="applyTaskFilters()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          <option>Hoch</option><option>Mittel</option><option>Niedrig</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:130px">
+        <label class="fl">Status</label>
+        <select id="tf-status" onchange="applyTaskFilters()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          <option>Offen</option><option>In Bearbeitung</option><option>Blockiert</option><option>Erledigt</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:130px">
+        <label class="fl">Fällig bis</label>
+        <input type="date" id="tf-due" onchange="applyTaskFilters()" style="padding:6px 8px;font-size:12px">
+      </div>
+      <button class="btn btn-sm" onclick="clearTaskFilters()">✕ Zurücksetzen</button>
+    </div>
+    <div id="tasks-content">${renderTaskList(getFilteredTasks())}</div>
+  `;
+}
+
+function getFilteredTasks(searchQ) {
+  let tasks = activeTeamTasks();
+  const person = document.getElementById('tf-person')?.value||'';
+  const prio   = document.getElementById('tf-prio')?.value||'';
+  const status = document.getElementById('tf-status')?.value||'';
+  const due    = document.getElementById('tf-due')?.value||'';
+  const lq     = (searchQ||'').toLowerCase();
+  if (person) tasks = tasks.filter(t=>t.assignee==person);
+  if (prio)   tasks = tasks.filter(t=>t.priority===prio);
+  if (status) tasks = tasks.filter(t=>(t.status||'Offen')===status);
+  if (due)    tasks = tasks.filter(t=>t.due&&t.due<=due);
+  if (lq)     tasks = tasks.filter(t=>t.title.toLowerCase().includes(lq)||((getMember(t.assignee)||{}).name||'').toLowerCase().includes(lq));
+  const open = tasks.filter(t=>t.status!=='Erledigt').sort((a,b)=>{const po={Hoch:0,Mittel:1,Niedrig:2};return (po[a.priority]||1)-(po[b.priority]||1);});
+  const done = tasks.filter(t=>t.status==='Erledigt');
+  return {open, done};
+}
+
+function applyTaskFilters() {
+  const {open, done} = getFilteredTasks();
+  document.getElementById('tasks-content').innerHTML = renderTaskList({open,done});
+}
+
+function clearTaskFilters() {
+  ['tf-person','tf-prio','tf-status','tf-due'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  applyTaskFilters();
+}
+
+function renderTaskList({open, done}) {
+  function taskRow(t, isDone) {
+    const m = getMember(t.assignee);
+    return `<div class="task-item">
+      <div class="task-check ${isDone?'done':''}" onclick="toggleTask(${t.id});applyTaskFilters()">
+        ${isDone?'<svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+      </div>
+      <div class="task-body">
+        <div class="task-title ${isDone?'done':''}">${t.title}</div>
+        <div class="task-meta">
+          ${m?`<span class="tag blue" style="padding:1px 6px">${m.name}</span>`:''}
+          <span class="${isOverdue(t.due)&&!isDone?'overdue':''}">${t.due?fmtDate(t.due):''}</span>
+          <span class="badge ${t.priority==='Hoch'?'badge-red':t.priority==='Mittel'?'badge-amber':'badge-gray'}">${t.priority}</span>
+          <span class="badge badge-blue">${t.status||'Offen'}</span>
+        </div>
+        ${t.desc?`<div style="font-size:12px;color:var(--muted);margin-top:3px">${t.desc}</div>`:''}
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="btn btn-sm" title="Bearbeiten" onclick="editTask(${t.id})">&#9998;</button>
+        <button class="btn btn-sm" title="Duplizieren" onclick="duplicateTask(${t.id})" style="color:var(--accent);border-color:var(--accent)">⧉</button>
+        <button class="btn btn-sm" title="Löschen" onclick="deleteTask(${t.id})" style="color:var(--danger);border-color:var(--danger)">&#215;</button>
+      </div>
+    </div>`;
+  }
+  return `
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title">Offen (${open.length})</div>
+      ${open.length===0?'<div style="color:var(--muted);font-size:13px">Keine Aufgaben gefunden 🎉</div>':open.map(t=>taskRow(t,false)).join('')}
+    </div>
+    ${done.length?`<div class="card">
+      <div class="card-title" style="color:var(--muted)">Erledigt (${done.length})</div>
+      ${done.map(t=>taskRow(t,true)).join('')}
+    </div>`:''}`;
+}
+
+function filterTasks(q) {
+  const {open, done} = getFilteredTasks(q);
+  document.getElementById('tasks-content').innerHTML = renderTaskList({open,done});
+}
+
+function duplicateTask(id) {
+  const t = getTask(id);
+  if (!t) return;
+  const copy = {...t, id: state.nextTaskId++, title: t.title+' (Kopie)', status:'Offen'};
+  state.tasks.push(copy);
+  save();
+  applyTaskFilters();
+}
+
+function deleteTask(id) {
+  if (!confirm('Aufgabe wirklich löschen?')) return;
+  state.tasks = state.tasks.filter(t=>t.id!==id);
+  save();
+  renderSidebar();
+  if (currentView==='tasks') applyTaskFilters();
+  else if (currentView==='member') renderMemberView(selectedMember);
+}
+
+function toggleTask(id) {
+  const t = getTask(id);
+  if (!t) return;
+  t.status = t.status==='Erledigt' ? 'Offen' : 'Erledigt';
+  save();
+  renderSidebar();
+}
+
+// ============================================================
+// BILAS VIEW
+// ============================================================
+function renderBilasView() {
+  document.getElementById('topbar-actions').innerHTML = `
+    <span id="sync-status"></span>
+    <button class="btn btn-sm" onclick="exportBilasPDF()" style="background:#fef9c3;border-color:#fde047;color:#854d0e">⬇ Export PDF</button>
+    <button class="btn btn-primary btn-sm" onclick="openNewBilaModal()">+ Gespräch</button>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="filter-bar">
+      <div style="flex:1;min-width:160px">
+        <label class="fl">Mitarbeiter</label>
+        <select id="bf-person" onchange="applyBilaFilters()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          ${activeTeamMembers().map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex:1;min-width:180px">
+        <label class="fl">Typ</label>
+        <select id="bf-type" onchange="applyBilaFilters()" style="padding:6px 8px;font-size:12px">
+          <option value="">Alle</option>
+          ${BILA_TYPES.map(t=>`<option>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div style="flex:1;min-width:130px">
+        <label class="fl">Von</label>
+        <input type="date" id="bf-from" onchange="applyBilaFilters()" style="padding:6px 8px;font-size:12px">
+      </div>
+      <div style="flex:1;min-width:130px">
+        <label class="fl">Bis</label>
+        <input type="date" id="bf-to" onchange="applyBilaFilters()" style="padding:6px 8px;font-size:12px">
+      </div>
+      <button class="btn btn-sm" onclick="clearBilaFilters()">✕ Zurücksetzen</button>
+    </div>
+    <div id="bilas-content">${renderBilaList(getFilteredBilas())}</div>
+  `;
+}
+
+function getFilteredBilas(searchQ) {
+  let bilas = [...activeTeamBilas()];
+  const person = document.getElementById('bf-person')?.value||'';
+  const type   = document.getElementById('bf-type')?.value||'';
+  const from   = document.getElementById('bf-from')?.value||'';
+  const to     = document.getElementById('bf-to')?.value||'';
+  const lq     = (searchQ||'').toLowerCase();
+  if (person) bilas = bilas.filter(b=>b.memberId==person);
+  if (type)   bilas = bilas.filter(b=>(b.type||'')=== type);
+  if (from)   bilas = bilas.filter(b=>b.date>=from);
+  if (to)     bilas = bilas.filter(b=>b.date<=to);
+  if (lq)     bilas = bilas.filter(b=>{
+    const m = getMember(b.memberId);
+    return (b.notes||'').toLowerCase().includes(lq)||(b.subject||'').toLowerCase().includes(lq)||
+           (m&&m.name.toLowerCase().includes(lq))||(b.tags||[]).some(t=>t.toLowerCase().includes(lq));
+  });
+  return bilas.sort((a,b)=>b.date.localeCompare(a.date));
+}
+
+function applyBilaFilters() {
+  document.getElementById('bilas-content').innerHTML = renderBilaList(getFilteredBilas());
+}
+
+function clearBilaFilters() {
+  ['bf-person','bf-type','bf-from','bf-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  applyBilaFilters();
+}
+
+function renderBilaList(bilas) {
+  if (!bilas.length) return '<div class="empty">Keine Gespräche gefunden</div>';
+  return bilas.map(b=>{
+    const m = getMember(b.memberId);
+    const gi = state.members.indexOf(m);
+    return `<div class="bila-entry" onclick="openBilaDetail(${b.id})">
+      <div class="bila-meta">
+        ${m?`<div class="avatar-sm ${avatarColor(gi)}" style="width:22px;height:22px;font-size:9px">${initials(m.name)}</div><span style="font-size:13px;font-weight:500">${m.name}</span>`:''}
+        <span class="bila-date">${fmtDate(b.date)}</span>
+        <span class="tag blue">${b.type||'BILA'}</span>
+        <span class="${confClass(b.conf)} conf-badge" style="margin-left:auto">${b.conf||'Standard'}</span>
+      </div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:3px">${b.subject||'Ohne Betreff'}</div>
+      <div class="bila-preview">${b.notes||'–'}</div>
+      ${b.tags&&b.tags.length?`<div style="margin-top:6px">${b.tags.map(t=>`<span class="tag">${t}</span>`).join(' ')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function filterBilas(q) {
+  document.getElementById('bilas-content').innerHTML = renderBilaList(getFilteredBilas(q));
+}
+
+function exportBilasPDF() {
+  const bilas = getFilteredBilas();
+  if (!bilas.length) { alert('Keine Gespräche zum Exportieren'); return; }
+
+  const teamName = currentTeamId ? (getTeam(currentTeamId)||{}).name||'Team' : 'Alle Teams';
+  const exportDate = new Date().toLocaleDateString('de-CH');
+
+  const rows = bilas.map(b => {
+    const m = getMember(b.memberId);
+    return `
+      <tr>
+        <td>${fmtDate(b.date)}</td>
+        <td>${m?m.name:'–'}</td>
+        <td>${b.type||'BILA'}</td>
+        <td>${b.subject||'–'}</td>
+        <td style="white-space:pre-wrap;max-width:220px">${b.notes||'–'}</td>
+        <td style="white-space:pre-wrap;max-width:160px">${b.agreements||'–'}</td>
+        <td style="white-space:pre-wrap;max-width:120px">${b.risks||'–'}</td>
+        <td>${b.followUp||'–'}</td>
+        <td>${(b.tags||[]).join(', ')||'–'}</td>
+        <td>${b.conf||'Standard'}</td>
+      </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Gespräche Export – ${teamName}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #1a1d23; padding: 20px; }
+    h1 { font-size: 16px; margin-bottom: 4px; }
+    .meta { color: #6b7280; font-size: 11px; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #1a1d23; color: #fff; padding: 7px 8px; text-align: left; font-size: 10px; white-space: nowrap; }
+    td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; vertical-align: top; font-size: 10px; }
+    tr:nth-child(even) td { background: #f9fafb; }
+    @media print { body { padding: 0; } }
+  </style></head><body>
+  <h1>Gespräche – ${teamName}</h1>
+  <div class="meta">Exportiert am ${exportDate} · ${bilas.length} Einträge</div>
+  <table>
+    <thead><tr>
+      <th>Datum</th><th>Mitarbeiter</th><th>Typ</th><th>Betreff</th>
+      <th>Notizen</th><th>Vereinbarungen</th><th>Risiken</th>
+      <th>Follow-up</th><th>Tags</th><th>Vertraulich.</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <script>window.onload=()=>window.print()<\/script>
+  </body></html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
+
+// ============================================================
+// BILA DETAIL
+// ============================================================
+function openBilaDetail(id) {
+  const b = getBila(id);
+  if (!b) return;
+  const m = getMember(b.memberId);
+  const gi = state.members.indexOf(m);
+  const bilaTasks = state.tasks.filter(t=>t.bilaId===id);
+  document.getElementById('bila-detail-title').textContent = `${m?m.name+' – ':''}${fmtDate(b.date)}`;
+  document.getElementById('bila-detail-body').innerHTML = `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <span class="tag blue">${b.type||'BILA'}</span>
+      <span class="${confClass(b.conf)} conf-badge">${b.conf||'Standard'}</span>
+      ${(b.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}
+    </div>
+    ${b.subject?`<div class="detail-label">Betreff</div><div style="font-size:14px;font-weight:500;margin-bottom:14px">${b.subject}</div>`:''}
+    ${b.notes?`<div class="detail-label">Notizen</div><div style="font-size:13px;white-space:pre-wrap;margin-bottom:14px;background:var(--bg);padding:10px;border-radius:6px">${b.notes}</div>`:''}
+    ${b.agreements?`<div class="detail-label">Vereinbarungen</div><div style="font-size:13px;white-space:pre-wrap;margin-bottom:14px">${b.agreements}</div>`:''}
+    ${b.risks?`<div class="detail-label">Risiken</div><div style="font-size:13px;white-space:pre-wrap;margin-bottom:14px;color:var(--danger)">${b.risks}</div>`:''}
+    ${b.followUp?`<div class="detail-label">Follow-ups</div><div style="font-size:13px;white-space:pre-wrap;margin-bottom:14px">${b.followUp}</div>`:''}
+    ${bilaTasks.length?`<div class="detail-label">Aufgaben (${bilaTasks.length})</div>
+    ${bilaTasks.map(t=>`<div class="task-item">
+      <div class="task-check ${t.status==='Erledigt'?'done':''}" onclick="toggleTask(${t.id});openBilaDetail(${id})">
+        ${t.status==='Erledigt'?'<svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+      </div>
+      <div class="task-body"><div class="task-title ${t.status==='Erledigt'?'done':''}">${t.title}</div><div class="task-meta">${t.due?fmtDate(t.due):''} · ${t.priority}</div></div>
+    </div>`).join('')}`:''}
+    <div style="display:flex;gap:8px;margin-top:20px;padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="editBila(${id})">Bearbeiten</button>
+      <button class="btn btn-sm" onclick="openNewTaskModal(${b.memberId},${id})">+ Aufgabe</button>
+      <button class="btn btn-sm btn-danger" onclick="deleteBila(${id})" style="margin-left:auto">Löschen</button>
+    </div>
+  `;
+  closeOverlay('overlay-bila');
+  openOverlay('overlay-bila-detail');
+}
+
+function deleteBila(id) {
+  if (!confirm('Gespräch wirklich löschen?')) return;
+  state.bilas = state.bilas.filter(b=>b.id!==id);
+  save();
+  closeOverlay('overlay-bila-detail');
+  if (selectedMember) renderMemberView(selectedMember);
+  else renderBilasView();
+}
+
+// ============================================================
+// BILA MODAL
+// ============================================================
+function openNewBilaModal(memberId, editId) {
+  const editing = editId ? getBila(editId) : null;
+  document.getElementById('bila-modal-title').textContent = editing ? 'Gespräch bearbeiten' : 'Neues Gespräch';
+  const selMember = memberId || (editing&&editing.memberId) || (activeTeamMembers().length===1?activeTeamMembers()[0].id:'');
+  const selTeam = (editing&&editing.teamId) || currentTeamId || (state.teams.length===1?state.teams[0].id:'');
+  document.getElementById('bila-modal-body').innerHTML = `
+    <!-- Row 1: Mitarbeiter + Team + Datum + Typ -->
+    <div style="display:grid;grid-template-columns:${state.teams.length>1?'1fr 1fr 140px 1fr':'1fr 140px 1fr'};gap:10px;margin-bottom:12px">
+      <div><label class="fl">Mitarbeiter *</label>
+        <select id="fm-member" ${memberId&&!editing?'disabled':''}>
+          <option value="">– Bitte wählen –</option>
+          ${state.members.map(m=>`<option value="${m.id}" ${m.id==selMember?'selected':''}>${m.name}</option>`).join('')}
+        </select>
+      </div>
+      ${state.teams.length>1?`<div><label class="fl">Team</label>
+        <select id="fm-team">
+          <option value="">Kein Team</option>
+          ${state.teams.map(t=>`<option value="${t.id}" ${t.id==selTeam?'selected':''}>${t.name}</option>`).join('')}
+        </select>
+      </div>`:''}
+      <div><label class="fl">Datum *</label><input type="date" id="fm-date" value="${editing?editing.date:today()}"></div>
+      <div><label class="fl">Typ</label><select id="fm-type">${BILA_TYPES.map(t=>`<option ${editing&&editing.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
+    </div>
+
+    <div class="form-row"><label class="fl">Betreff</label><input type="text" id="fm-subject" value="${editing?editing.subject||'':''}" placeholder="Worum ging es?"></div>
+
+    <!-- Row 2: Notizen (left, tall) | Vereinbarungen + Risiken stacked (right) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="form-row" style="margin:0"><label class="fl">Notizen</label><textarea id="fm-notes" rows="8" style="height:180px">${editing?editing.notes||'':''}</textarea></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="form-row" style="margin:0;flex:1"><label class="fl">Vereinbarungen</label><textarea id="fm-agreements" rows="4" style="height:82px">${editing?editing.agreements||'':''}</textarea></div>
+        <div class="form-row" style="margin:0;flex:1"><label class="fl">Risiken</label><textarea id="fm-risks" rows="4" style="height:82px">${editing?editing.risks||'':''}</textarea></div>
+      </div>
+    </div>
+
+    <div class="form-row"><label class="fl">Follow-ups / Nächste Schritte</label><textarea id="fm-followup" rows="2">${editing?editing.followUp||'':''}</textarea></div>
+
+    <!-- Row 3: Tags + Vertraulichkeit -->
+    <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;margin-bottom:12px">
+      <div class="form-row" style="margin:0"><label class="fl">Tags</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px" id="fm-tags">
+          ${ALL_TAGS.map(t=>`<span class="tag ${editing&&(editing.tags||[]).includes(t)?'blue':'gray'}" style="cursor:pointer" onclick="this.classList.toggle('blue');this.classList.toggle('gray')">${t}</span>`).join('')}
+        </div>
+      </div>
+      <div class="form-row" style="margin:0;min-width:160px"><label class="fl">Vertraulichkeit</label><select id="fm-conf">${CONF_LEVELS.map(c=>`<option ${editing&&editing.conf===c?'selected':''}>${c}</option>`).join('')}</select></div>
+    </div>
+
+    <div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--border)">
+      <button class="btn btn-primary" onclick="saveBila(${editing?editing.id:0},${memberId||0})">${editing?'Speichern':'Erstellen'}</button>
+      <button class="btn" onclick="closeOverlay('overlay-bila')">Abbrechen</button>
+    </div>
+  `;
+  closeOverlay('overlay-bila-detail');
+  openOverlay('overlay-bila');
+}
+
+function saveBila(editId, prefillMember) {
+  const memberId = parseInt(document.getElementById('fm-member').value)||prefillMember;
+  const date = document.getElementById('fm-date').value;
+  if (!memberId||!date) { alert('Mitarbeiter und Datum erforderlich'); return; }
+  const teamEl = document.getElementById('fm-team');
+  const teamId = teamEl ? (parseInt(teamEl.value)||null) : (currentTeamId||null);
+  const tags = [...document.querySelectorAll('#fm-tags .tag.blue')].map(el=>el.textContent);
+  const data = {
+    memberId, date, teamId,
+    type: document.getElementById('fm-type').value,
+    subject: document.getElementById('fm-subject').value,
+    notes: document.getElementById('fm-notes').value,
+    agreements: document.getElementById('fm-agreements').value,
+    risks: document.getElementById('fm-risks').value,
+    followUp: document.getElementById('fm-followup').value,
+    tags, conf: document.getElementById('fm-conf').value
+  };
+  if (editId) { Object.assign(getBila(editId), data); }
+  else { state.bilas.push({id: state.nextBilaId++, ...data}); }
+  save();
+  closeOverlay('overlay-bila');
+  if (selectedMember) renderMemberView(selectedMember);
+  else if (currentView==='bilas') renderBilasView();
+  else renderDashboard();
+}
+
+function editBila(id) { closeOverlay('overlay-bila-detail'); openNewBilaModal(null, id); }
+
+// ============================================================
+// TASK MODAL
+// ============================================================
+function openNewTaskModal(memberId, bilaId, editId) {
+  const editing = editId ? getTask(editId) : null;
+  document.getElementById('task-modal-title').textContent = editing ? 'Aufgabe bearbeiten' : 'Neue Aufgabe';
+  const selMember = memberId || (editing&&editing.assignee) || '';
+  const selTeam = (editing&&editing.teamId) || currentTeamId || '';
+  document.getElementById('task-modal-body').innerHTML = `
+    <div class="form-row"><label class="fl">Titel *</label><input type="text" id="tm-title" value="${editing?editing.title:''}" placeholder="Was ist zu tun?"></div>
+    <div class="form-row"><label class="fl">Beschreibung</label><textarea id="tm-desc" rows="2">${editing?editing.desc||'':''}</textarea></div>
+    <div class="form-grid2">
+      <div class="form-row"><label class="fl">Zugewiesen an</label>
+        <select id="tm-assignee">
+          <option value="">Alle / SM</option>
+          ${state.members.map(m=>`<option value="${m.id}" ${m.id==selMember?'selected':''}>${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row"><label class="fl">Priorität</label>
+        <select id="tm-prio">${PRIOS.map(p=>`<option ${editing&&editing.priority===p?'selected':''}>${p}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="form-grid2">
+      <div class="form-row"><label class="fl">Status</label>
+        <select id="tm-status">${['Offen','In Bearbeitung','Blockiert','Erledigt'].map(s=>`<option ${editing&&editing.status===s?'selected':''}>${s}</option>`).join('')}</select>
+      </div>
+      <div class="form-row"><label class="fl">Fälligkeitsdatum</label><input type="date" id="tm-due" value="${editing?editing.due||'':''}"></div>
+    </div>
+    ${state.teams.length>1?`<div class="form-row"><label class="fl">Team</label>
+      <select id="tm-team"><option value="">Kein Team</option>${state.teams.map(t=>`<option value="${t.id}" ${t.id==selTeam?'selected':''}>${t.name}</option>`).join('')}</select>
+    </div>`:''}
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-primary" onclick="saveTask(${editing?editing.id:0},${bilaId||0})">${editing?'Speichern':'Erstellen'}</button>
+      <button class="btn" onclick="closeOverlay('overlay-task')">Abbrechen</button>
+    </div>
+  `;
+  openOverlay('overlay-task');
+}
+
+function saveTask(editId, bilaId) {
+  const title = document.getElementById('tm-title').value.trim();
+  if (!title) { alert('Titel erforderlich'); return; }
+  const teamEl = document.getElementById('tm-team');
+  const data = {
+    title, desc: document.getElementById('tm-desc').value,
+    assignee: parseInt(document.getElementById('tm-assignee').value)||null,
+    priority: document.getElementById('tm-prio').value,
+    status: document.getElementById('tm-status').value,
+    due: document.getElementById('tm-due').value,
+    teamId: teamEl ? (parseInt(teamEl.value)||null) : (currentTeamId||null),
+    bilaId: bilaId||null
+  };
+  if (editId) { Object.assign(getTask(editId), data); }
+  else { state.tasks.push({id: state.nextTaskId++, ...data}); }
+  save();
+  closeOverlay('overlay-task');
+  renderSidebar();
+  if (currentView==='tasks') { renderTasksView(); }
+  else if (currentView==='member') renderMemberView(selectedMember);
+  else renderDashboard();
+}
+
+function editTask(id) { openNewTaskModal(null, null, id); }
+
+// ============================================================
+// MEMBER MODAL
+// ============================================================
+function memberModalHTML(m) {
+  // m = existing member object for edit, or null for new
+  const isEdit = !!m;
+  const kids = m ? (m.children||[]) : [];
+
+  return `
+    <!-- TABS inside modal -->
+    <div class="tabs" id="mm-tabs" style="margin:-4px 0 16px">
+      <div class="tab active" onclick="mmTab('basis')">Basis</div>
+      <div class="tab" onclick="mmTab('person')">Person</div>
+      <div class="tab" onclick="mmTab('beruf')">Beruf</div>
+      <div class="tab" onclick="mmTab('privat')">Privat</div>
+    </div>
+
+    <!-- TAB: BASIS -->
+    <div id="mm-tab-basis">
+      <div class="form-row"><label class="fl">Name *</label><input type="text" id="mm-name" value="${esc(m?m.name:'')}" placeholder="Vor- und Nachname"></div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="fl">Rolle / Position</label><input type="text" id="mm-role" value="${esc(m?m.role:'')}" placeholder="z.B. Developer, QA Engineer"></div>
+        <div class="form-row"><label class="fl">Eintrittsdatum</label><input type="date" id="mm-since" value="${m?m.since||'':''}"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="fl">E-Mail</label><input type="email" id="mm-email" value="${esc(m?m.email:'')}" placeholder="name@firma.ch"></div>
+        <div class="form-row"><label class="fl">Telefon geschäftlich</label><input type="text" id="mm-phone-work" value="${esc(m?m.phoneWork:'')}" placeholder="+41 44 000 00 00"></div>
+      </div>
+      <div class="form-row"><label class="fl">Telefon privat</label><input type="text" id="mm-phone-private" value="${esc(m?m.phonePrivate:'')}" placeholder="+41 79 000 00 00"></div>
+
+      <div class="form-row">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label class="fl" style="margin:0">Notfallkontakte</label>
+          <button class="btn btn-sm" onclick="addEmergencyField()">+ Kontakt</button>
+        </div>
+        <div id="mm-emergency">
+          ${(m?m.emergencyContacts||[]:emergencyDefaults()).map((ec,i)=>`<div class="ec-row" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center">
+            <input type="text" placeholder="Name" value="${esc(ec.name)}" oninput="updateEC(${i},'name',this.value)">
+            <input type="text" placeholder="Beziehung" value="${esc(ec.rel)}" oninput="updateEC(${i},'rel',this.value)">
+            <input type="text" placeholder="Telefon" value="${esc(ec.phone)}" oninput="updateEC(${i},'phone',this.value)">
+            <button class="btn btn-sm" onclick="removeECField(${i})" style="color:var(--danger);border-color:var(--danger);padding:4px 8px">&#215;</button>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="form-row"><label class="fl">Teams (Mehrfachauswahl)</label>
+        <div style="display:flex;flex-direction:column;gap:6px" id="mm-teams">
+          ${state.teams.map(t=>`<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="checkbox" value="${t.id}" ${(m?(m.teamIds||[]):currentTeamId?[currentTeamId]:[]).includes(t.id)?'checked':''} style="width:14px;height:14px"> ${t.name}
+          </label>`).join('')}
+        </div>
+      </div>
+      <div class="form-row"><label class="fl">Kurznotiz</label><textarea id="mm-notes" rows="2" placeholder="Kurzbeschreibung, erster Eindruck…">${m?m.notes||'':''}</textarea></div>
+    </div>
+
+    <!-- TAB: PERSON -->
+    <div id="mm-tab-person" style="display:none">
+      <div class="form-grid2">
+        <div class="form-row"><label class="fl">Geburtstag</label><input type="date" id="mm-birthday" value="${m?m.birthday||'':''}"></div>
+        <div class="form-row"><label class="fl">Nationalität</label><input type="text" id="mm-nationality" value="${esc(m?m.nationality:'')}" placeholder="z.B. Schweiz, Deutschland"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="fl">Wohnort</label><input type="text" id="mm-location" value="${esc(m?m.location:'')}" placeholder="z.B. Zürich"></div>
+        <div class="form-row"><label class="fl">Sprachen</label><input type="text" id="mm-languages" value="${esc(m?m.languages:'')}" placeholder="z.B. Deutsch, Englisch, Französisch"></div>
+      </div>
+      <div class="form-row"><label class="fl">Familienstand</label>
+        <select id="mm-familystatus">
+          ${['','Ledig','Verheiratet','Partnerschaft','Geschieden','Verwitwet'].map(s=>`<option ${(m?m.familyStatus||'':'')===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label class="fl" style="margin:0">Kinder</label>
+          <button class="btn btn-sm" onclick="addChildField()">+ Kind</button>
+        </div>
+        <div id="mm-children">
+          ${kids.map((k,i)=>`<div class="child-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
+            <input type="text" placeholder="Name" value="${esc(k.name)}" style="flex:2" oninput="updateChild(${i},'name',this.value)">
+            <input type="date" value="${k.dob||''}" style="flex:2" oninput="updateChild(${i},'dob',this.value)">
+            <button class="btn btn-sm" onclick="removeChildField(${i})" style="flex-shrink:0;color:var(--danger);border-color:var(--danger)">&#215;</button>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: BERUF -->
+    <div id="mm-tab-beruf" style="display:none">
+      <div class="form-row"><label class="fl">Skills / Technologien</label><textarea id="mm-skills" rows="2" placeholder="z.B. Java, Scrum, SQL, Azure, Kubernetes…">${m?m.skills||'':''}</textarea></div>
+      <div class="form-row"><label class="fl">Zertifizierungen</label><textarea id="mm-certs" rows="2" placeholder="z.B. PSM II, AWS Solutions Architect, ITIL…">${m?m.certs||'':''}</textarea></div>
+      <div class="form-row"><label class="fl">Karriereziele / Ambitionen</label><textarea id="mm-career" rows="2" placeholder="Was möchte die Person in 1–3 Jahren erreichen?">${m?m.career||'':''}</textarea></div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="fl">Arbeitsstil</label><input type="text" id="mm-workstyle" value="${esc(m?m.workstyle:'')}" placeholder="z.B. sehr selbständig, braucht Struktur"></div>
+        <div class="form-row"><label class="fl">Pensum / Vertrag</label><input type="text" id="mm-contract" value="${esc(m?m.contract:'')}" placeholder="z.B. 100%, befristet bis 12.2026"></div>
+      </div>
+      <div class="form-row"><label class="fl">Stärken</label><textarea id="mm-strengths" rows="2" placeholder="Was macht diese Person besonders gut?">${m?m.strengths||'':''}</textarea></div>
+      <div class="form-row"><label class="fl">Entwicklungsfelder</label><textarea id="mm-growthfields" rows="2" placeholder="Wo besteht Potenzial zur Weiterentwicklung?">${m?m.growthFields||'':''}</textarea></div>
+    </div>
+
+    <!-- TAB: PRIVAT -->
+    <div id="mm-tab-privat" style="display:none">
+      <div class="form-row"><label class="fl">Hobbys &amp; Interessen</label><textarea id="mm-hobbies" rows="2" placeholder="z.B. Ski fahren, Kochen, Gaming, Fotografie…">${m?m.hobbies||'':''}</textarea></div>
+      <div class="form-row"><label class="fl">Motivation / Was treibt sie an</label><textarea id="mm-motivation" rows="2" placeholder="Was ist der Person im Job wichtig? Anerkennug, Freiheit, Sinn…">${m?m.motivation||'':''}</textarea></div>
+      <div class="form-row"><label class="fl">Kommunikationsstil</label>
+        <select id="mm-commstyle">
+          ${['','Direkt / offen','Eher zurückhaltend','Schriftlich bevorzugt','Mündlich bevorzugt','Braucht Zeit zum Nachdenken'].map(s=>`<option ${(m?m.commStyle||'':'')===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row"><label class="fl">Umgang mit Feedback</label>
+        <select id="mm-feedbackstyle">
+          ${['','Nimmt Feedback gut an','Reagiert sensibel','Braucht positiven Rahmen','Direkt und unkompliziert'].map(s=>`<option ${(m?m.feedbackStyle||'':'')===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-row"><label class="fl">Besonderheiten</label><textarea id="mm-special" rows="2" placeholder="Wichtige persönliche Infos: Allergien, religiöse Besonderheiten, Einschränkungen, Verpflichtungen…">${m?m.special||'':''}</textarea></div>
+      <div class="form-row"><label class="fl">Vertrauliche Notizen (intern)</label><textarea id="mm-confidential" rows="2" placeholder="Nur für dich – nicht exportiert in Standardberichten">${m?m.confidential||'':''}</textarea></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveMember(${isEdit?m.id:''})">${isEdit?'Speichern':'Anlegen'}</button>
+      ${isEdit?`<button class="btn btn-danger btn-sm" onclick="deleteMember(${m.id})">Löschen</button>`:''}
+      <button class="btn" onclick="closeOverlay('overlay-member')">Abbrechen</button>
+    </div>
+  `;
+}
+
+// Temporary children array while modal is open
+let _mmChildren = [];
+let _mmEmergency = [];
+
+function emergencyDefaults() { return []; }
+
+function addEmergencyField() {
+  _mmEmergency.push({name:'', rel:'', phone:''});
+  refreshECFields();
+}
+function removeECField(i) {
+  _mmEmergency.splice(i,1);
+  refreshECFields();
+}
+function updateEC(i, field, val) {
+  if (_mmEmergency[i]) _mmEmergency[i][field] = val;
+}
+function refreshECFields() {
+  const cont = document.getElementById('mm-emergency');
+  if (!cont) return;
+  cont.innerHTML = _mmEmergency.map((ec,i)=>`<div class="ec-row" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center">
+    <input type="text" placeholder="Name" value="${esc(ec.name||'')}" oninput="updateEC(${i},'name',this.value)">
+    <input type="text" placeholder="Beziehung" value="${esc(ec.rel||'')}" oninput="updateEC(${i},'rel',this.value)">
+    <input type="text" placeholder="Telefon" value="${esc(ec.phone||'')}" oninput="updateEC(${i},'phone',this.value)">
+    <button class="btn btn-sm" onclick="removeECField(${i})" style="color:var(--danger);border-color:var(--danger);padding:4px 8px">&#215;</button>
+  </div>`).join('');
+}
+
+function mmTab(tab) {
+  ['basis','person','beruf','privat'].forEach(t => {
+    const el = document.getElementById('mm-tab-'+t);
+    if (el) el.style.display = t===tab ? '' : 'none';
+  });
+  document.querySelectorAll('#mm-tabs .tab').forEach((el,i) => {
+    el.classList.toggle('active', ['basis','person','beruf','privat'][i]===tab);
+  });
+}
+
+function addChildField() {
+  _mmChildren.push({name:'', dob:''});
+  refreshChildFields();
+}
+
+function removeChildField(i) {
+  _mmChildren.splice(i,1);
+  refreshChildFields();
+}
+
+function updateChild(i, field, val) {
+  if (_mmChildren[i]) _mmChildren[i][field] = val;
+}
+
+function refreshChildFields() {
+  const cont = document.getElementById('mm-children');
+  if (!cont) return;
+  cont.innerHTML = _mmChildren.map((k,i)=>`<div class="child-row" style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
+    <input type="text" placeholder="Name" value="${esc(k.name||'')}" style="flex:2" oninput="updateChild(${i},'name',this.value)">
+    <input type="date" value="${k.dob||''}" style="flex:2" onchange="updateChild(${i},'dob',this.value)">
+    <button class="btn btn-sm" onclick="removeChildField(${i})" style="flex-shrink:0;color:var(--danger);border-color:var(--danger)">&#215;</button>
+  </div>`).join('');
+}
+
+function openAddMemberModal() {
+  _mmChildren = [];
+  _mmEmergency = [];
+  document.getElementById('member-modal-title').textContent = 'Mitglied anlegen';
+  document.getElementById('member-modal-body').innerHTML = memberModalHTML(null);
+  openOverlay('overlay-member');
+}
+
+function editMember(id) {
+  const m = getMember(id);
+  if (!m) return;
+  _mmChildren = JSON.parse(JSON.stringify(m.children||[]));
+  _mmEmergency = JSON.parse(JSON.stringify(m.emergencyContacts||[]));
+  document.getElementById('member-modal-title').textContent = 'Mitglied bearbeiten';
+  document.getElementById('member-modal-body').innerHTML = memberModalHTML(m);
+  openOverlay('overlay-member');
+}
+
+function saveMember(editId) {
+  const name = document.getElementById('mm-name').value.trim();
+  if (!name) { alert('Name erforderlich'); return; }
+
+  // Collect children from live _mmChildren array (updated via updateChild)
+  const childEls = document.querySelectorAll('.child-row');
+  const children = Array.from(childEls).map((row,i) => {
+    const inputs = row.querySelectorAll('input');
+    return { name: inputs[0]?.value||'', dob: inputs[1]?.value||'' };
+  }).filter(k=>k.name||k.dob);
+
+  // Collect emergency contacts from live DOM
+  const ecEls = document.querySelectorAll('.ec-row');
+  const emergencyContacts = Array.from(ecEls).map(row => {
+    const inputs = row.querySelectorAll('input');
+    return { name: inputs[0]?.value||'', rel: inputs[1]?.value||'', phone: inputs[2]?.value||'' };
+  }).filter(ec=>ec.name||ec.phone);
+
+  const teamIds = [...document.querySelectorAll('#mm-teams input:checked')].map(el=>parseInt(el.value));
+
+  const data = {
+    name,
+    role:        document.getElementById('mm-role')?.value||'',
+    since:       document.getElementById('mm-since')?.value||'',
+    email:       document.getElementById('mm-email')?.value||'',
+    phoneWork:   document.getElementById('mm-phone-work')?.value||'',
+    phonePrivate:document.getElementById('mm-phone-private')?.value||'',
+    notes:       document.getElementById('mm-notes')?.value||'',
+    teamIds,
+    emergencyContacts,
+    // Person tab
+    birthday:    document.getElementById('mm-birthday')?.value||'',
+    nationality: document.getElementById('mm-nationality')?.value||'',
+    location:    document.getElementById('mm-location')?.value||'',
+    languages:   document.getElementById('mm-languages')?.value||'',
+    familyStatus:document.getElementById('mm-familystatus')?.value||'',
+    children,
+    // Beruf tab
+    skills:      document.getElementById('mm-skills')?.value||'',
+    certs:       document.getElementById('mm-certs')?.value||'',
+    career:      document.getElementById('mm-career')?.value||'',
+    workstyle:   document.getElementById('mm-workstyle')?.value||'',
+    contract:    document.getElementById('mm-contract')?.value||'',
+    strengths:   document.getElementById('mm-strengths')?.value||'',
+    growthFields:document.getElementById('mm-growthfields')?.value||'',
+    // Privat tab
+    hobbies:     document.getElementById('mm-hobbies')?.value||'',
+    motivation:  document.getElementById('mm-motivation')?.value||'',
+    commStyle:   document.getElementById('mm-commstyle')?.value||'',
+    feedbackStyle:document.getElementById('mm-feedbackstyle')?.value||'',
+    special:     document.getElementById('mm-special')?.value||'',
+    confidential:document.getElementById('mm-confidential')?.value||'',
+  };
+
+  if (editId) {
+    const existing = getMember(parseInt(editId));
+    if (existing) Object.assign(existing, data);
+  } else {
+    state.members.push({id: state.nextMemberId++, ...data, devGoals:[]});
+  }
+  save();
+  closeOverlay('overlay-member');
+  renderSidebar();
+  if (editId) renderMemberView(parseInt(editId));
+  else renderDashboard();
+}
+
+function deleteMember(id) {
+  if (!confirm('Mitglied und alle zugehörigen Daten wirklich löschen?')) return;
+  state.members = state.members.filter(m=>m.id!==id);
+  state.bilas = state.bilas.filter(b=>b.memberId!==id);
+  state.tasks = state.tasks.filter(t=>t.assignee!==id);
+  save();
+  closeOverlay('overlay-member');
+  selectedMember = null;
+  renderSidebar();
+  showView('dashboard');
+}
+
+// ============================================================
+// AI ASSISTANT
+// ============================================================
+function renderAIView() {
+  document.getElementById('topbar-actions').innerHTML = `<span id="sync-status"></span><button class="btn btn-sm" onclick="clearAIHistory()">Verlauf löschen</button>`;
+  document.getElementById('content').innerHTML = `
+    <div style="max-width:680px">
+      <div style="margin-bottom:16px">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Vorschläge:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${['Überfällige Aufgaben?','Letzte BILAs pro Person','Team-Zusammenfassung','Risiken im Team','Feedback für nächstes BILA'].map(s=>`<span class="tag blue" style="cursor:pointer;padding:4px 10px" onclick="sendAIQuery('${s}')">${s}</span>`).join('')}
+        </div>
+      </div>
+      <div class="ai-chat" id="ai-chat">
+        ${state.aiHistory.length===0?'<div class="ai-msg ai"><div class="ai-label">KI-Assistent</div>Hallo! Ich beantworte Fragen über dein Team, analysiere Trends und helfe bei Feedback. Was möchtest du wissen?</div>':
+        state.aiHistory.map(msg=>`<div class="ai-msg ${msg.role}"><div class="ai-label">${msg.role==='user'?'Du':'KI-Assistent'}</div>${msg.content.replace(/\n/g,'<br>')}</div>`).join('')}
+      </div>
+      <div class="ai-input-row">
+        <input type="text" id="ai-input" placeholder="Frage stellen…" onkeydown="if(event.key==='Enter')submitAI()">
+        <button class="btn btn-primary btn-sm" onclick="submitAI()">Senden</button>
+      </div>
+    </div>
+  `;
+  const chat = document.getElementById('ai-chat');
+  if (chat) chat.scrollTop = chat.scrollHeight;
+}
+
+function submitAI() {
+  const inp = document.getElementById('ai-input');
+  if (!inp) return;
+  const q = inp.value.trim();
+  if (!q) return;
+  inp.value = '';
+  sendAIQuery(q);
+}
+
+function sendAIQuery(q) {
+  state.aiHistory.push({role:'user',content:q});
+  renderAIView();
+  const ctx = buildAIContext();
+  const system = `Du bist KI-Assistent für einen Scrum Master. Teamdaten:\n\n${ctx}\n\nBeantworte Fragen präzise auf Deutsch.`;
+  const messages = state.aiHistory.map(m=>({role:m.role==='user'?'user':'assistant',content:m.content}));
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,messages})
+  }).then(r=>r.json()).then(data=>{
+    const text = data.content&&data.content[0]&&data.content[0].text||'Keine Antwort.';
+    state.aiHistory.push({role:'ai',content:text});
+    save();
+    renderAIView();
+  }).catch(()=>{
+    state.aiHistory.push({role:'ai',content:answerLocally(q)});
+    save();
+    renderAIView();
+  });
+}
+
+function buildAIContext() {
+  const members = activeTeamMembers();
+  const bilas = activeTeamBilas();
+  const tasks = activeTeamTasks();
+  const mSummary = members.map(m=>{
+    const mb = bilas.filter(b=>b.memberId===m.id);
+    const last = [...mb].sort((a,b)=>b.date.localeCompare(a.date))[0];
+    return `- ${m.name} (${m.role||'?'}): ${mb.length} BILAs, letztes: ${last?last.date:'–'}, offene Tasks: ${tasks.filter(t=>t.assignee===m.id&&t.status!=='Erledigt').length}`;
+  }).join('\n');
+  const od = tasks.filter(t=>t.status!=='Erledigt'&&isOverdue(t.due));
+  return `TEAM: ${state.teams.length} Teams, aktuell: ${currentTeamId?(getTeam(currentTeamId)||{}).name||'?':'Alle'}\nMITGLIEDER:\n${mSummary||'Keine'}\nÜBERFÄLLIG: ${od.length}\n${od.map(t=>`- ${t.title}`).join('\n')}`;
+}
+
+function answerLocally(q) {
+  const lq = q.toLowerCase();
+  if (lq.includes('überfällig')) {
+    const od = activeTeamTasks().filter(t=>t.status!=='Erledigt'&&isOverdue(t.due));
+    if (!od.length) return 'Keine überfälligen Aufgaben ✓';
+    return od.map(t=>`• ${t.title} (${getMember(t.assignee)?.name||'–'}, seit ${fmtDate(t.due)})`).join('\n');
+  }
+  if (lq.includes('bila')&&lq.includes('letzt')) {
+    return activeTeamMembers().map(m=>{
+      const mb = activeTeamBilas().filter(b=>b.memberId===m.id).sort((a,b)=>b.date.localeCompare(a.date));
+      return `• ${m.name}: ${mb[0]?fmtDate(mb[0].date):'Noch kein BILA'}`;
+    }).join('\n');
+  }
+  if (lq.includes('risiko')||lq.includes('risk')) {
+    const r = analyzeRisks();
+    return r.length ? r.map(ri=>`• [${ri.level.toUpperCase()}] ${ri.text}: ${ri.sub}`).join('\n') : 'Keine Risiken erkannt.';
+  }
+  if (lq.includes('aufgabe')||lq.includes('task')) {
+    const open = activeTeamTasks().filter(t=>t.status!=='Erledigt');
+    if (!open.length) return 'Keine offenen Aufgaben.';
+    return `${open.length} offene Aufgaben:\n`+open.slice(0,8).map(t=>`• ${t.title} (${getMember(t.assignee)?.name||'SM'}, ${t.priority})`).join('\n');
+  }
+  if (lq.includes('feedback')) {
+    const fbs = (state.feedbacks||[]);
+    if (!fbs.length) return 'Noch kein Feedback erfasst.';
+    return `${fbs.length} Feedback-Einträge, davon ${fbs.filter(f=>f.status==='Pending').length} pending.`;
+  }
+  // Generic team summary
+  if (lq.includes('zusammenfassung')||lq.includes('team')) {
+    const members = activeTeamMembers();
+    const teamName = currentTeamId?(getTeam(currentTeamId)||{}).name||'Aktuelles Team':'Alle Teams';
+    return `📊 ${teamName}: ${members.length} Mitglieder, ${activeTeamBilas().length} Gespräche, ${activeTeamTasks().filter(t=>t.status!=='Erledigt').length} offene Aufgaben.`;
+  }
+  return `Frage erhalten. Für umfangreiche KI-Antworten wird eine API-Verbindung benötigt.\n\n📌 KI einrichten:\n1. Du benötigst einen Anthropic API-Key unter console.anthropic.com\n2. Öffne diese HTML-Datei in einem Code-Editor\n3. Suche nach: fetch https://api.anthropic.com/v1/messages\n4. Diese Funktion benötigt einen Proxy-Server oder eine Browser-Extension die den API-Key hinzufügt, da direkte API-Aufrufe vom Browser CORS-Fehler erzeugen\n5. Alternative: Verwende das Claude.ai Artifact-System wo der Key automatisch gesetzt wird\n\n💡 Lokal kann ich antworten auf: "Risiken im Team", "überfällige Aufgaben", "letzte BILAs", "offene Aufgaben", "Team-Zusammenfassung"`;
+}
+
+function clearAIHistory() { state.aiHistory=[]; save(); renderAIView(); }
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function renderSettingsView() {
+  document.getElementById('topbar-actions').innerHTML = '<span id="sync-status"></span>';
+  const bp = state.backup;
+  const stats = {
+    teams: state.teams.length,
+    members: state.members.length,
+    bilas: state.bilas.length,
+    tasks: state.tasks.length,
+  };
+
+  document.getElementById('content').innerHTML = `
+    <div style="max-width:640px">
+
+      <!-- TEAMS -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="section-head"><span class="card-title">Teams (${stats.teams})</span><button class="btn btn-primary btn-sm" onclick="openTeamModal()">+ Team</button></div>
+        ${state.teams.length===0?'<div style="color:var(--muted);font-size:13px">Noch keine Teams angelegt.</div>':
+        state.teams.map(t=>`<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f2f5;gap:10px">
+          <div style="flex:1;min-width:0">
+            <span style="font-size:13px;font-weight:500">${t.name}</span>
+            <span style="font-size:11px;color:var(--muted);margin-left:8px">${state.members.filter(m=>(m.teamIds||[]).includes(t.id)).length} Mitglieder</span>
+            ${t.notes?`<div style="font-size:12px;color:var(--muted);margin-top:3px;white-space:pre-wrap">${t.notes}</div>`:''}
+          </div>
+          <button class="btn btn-sm" style="flex-shrink:0" onclick="openTeamModal(${t.id})">Bearbeiten</button>
+        </div>`).join('')}
+      </div>
+
+      <!-- MODULE -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Module ein-/ausschalten</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Deaktivierte Module werden in der Navigation und auf dem Dashboard ausgeblendet.</p>
+        ${[
+          {key:'tasks',    icon:'✅', label:'Aufgaben',           sub:'Aufgabenverwaltung und Aufgaben-Tab'},
+          {key:'bilas',    icon:'📅', label:'Gespräche',          sub:'BILA-Verwaltung und Gesprächs-Tab'},
+          {key:'feedback', icon:'💬', label:'Feedback-Tracking',  sub:'Feedback erfassen und tracken'},
+          {key:'devgoals', icon:'🎯', label:'Entwicklungsziele',  sub:'Ziele, Subtasks und Fortschritt'},
+          {key:'ai',       icon:'🤖', label:'KI-Assistent',       sub:'KI-gestützte Analysen und Antworten'},
+        ].map(m=>`<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #f0f2f5">
+          <input type="checkbox" id="mod-${m.key}" ${(state.modules||{})[m.key]!==false?'checked':''} onchange="toggleModule('${m.key}',this.checked)" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer">
+          <div>
+            <div style="font-size:13px;font-weight:500">${m.icon} ${m.label}</div>
+            <div style="font-size:12px;color:var(--muted)">${m.sub}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Statistiken</div>
+        <div class="metric-grid">
+          <div class="metric"><div class="metric-label">Teams</div><div class="metric-val">${stats.teams}</div></div>
+          <div class="metric"><div class="metric-label">Mitglieder</div><div class="metric-val">${stats.members}</div></div>
+          <div class="metric"><div class="metric-label">Gespräche</div><div class="metric-val">${stats.bilas}</div></div>
+          <div class="metric"><div class="metric-label">Aufgaben</div><div class="metric-val">${stats.tasks}</div></div>
+        </div>
+      </div>
+
+      <!-- BACKUP -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="section-head">
+          <span class="card-title">Backup &amp; Sync</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" onclick="openSetupGuide('gist')">? Anleitung</button>
+            <button class="btn btn-primary btn-sm" onclick="runBackup()">Jetzt sichern</button>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Aktivierte Optionen werden nach jeder Änderung automatisch ausgeführt.</p>
+
+        <!-- BACKUP – LOCAL ONLY -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="section-head">
+            <span class="card-title">💾 Backup & Wiederherstellung</span>
+            <button class="btn btn-primary btn-sm" onclick="exportDataManual()">Jetzt sichern</button>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:16px">
+            Alle Daten werden im Browser (localStorage) gespeichert. Erstelle regelmäßig manuelle Backups als JSON-Datei auf deinem Gerät.
+          </p>
+
+          <!-- AUTO BACKUP ON CHANGE -->
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+            <input type="checkbox" id="bp-local" ${bp.localEnabled?'checked':''} onchange="saveBp()" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer">
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:500">⚡ Automatisches Backup bei jeder Änderung</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">Nach jeder Änderung wird automatisch eine JSON-Datei heruntergeladen.</div>
+              <details style="margin-top:8px">
+                <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--accent)">📖 Schritt-für-Schritt Anleitung</summary>
+                <ol style="font-size:12px;color:var(--muted);padding-left:16px;margin-top:6px;line-height:1.9">
+                  <li>Checkbox oben aktivieren ✓</li>
+                  <li>Nach jeder Änderung erscheint ein Download-Dialog im Browser</li>
+                  <li>Datei in einem festen Ordner speichern (z.B. <code style="background:#f0f2f5;padding:1px 5px;border-radius:3px">Dokumente/TeamInsight-Backups/</code>)</li>
+                  <li>Ältere Backups regelmäßig löschen – 5 aktuelle Versionen sind genug</li>
+                  <li>Für Wiederherstellung: Datei über den Import-Button unten einlesen</li>
+                </ol>
+              </details>
+            </div>
+          </div>
+
+          <!-- MANUAL BACKUP + CUSTOM FILENAME -->
+          <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+            <div style="font-size:13px;font-weight:500;margin-bottom:8px">📁 Manuelles Backup</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="text" id="bp-filename" value="${bp.filename||'TeamInsight-Backup'}" placeholder="Dateiname (ohne .json)" style="flex:1;min-width:180px;font-size:12px;padding:6px 8px" onchange="saveBp()">
+              <button class="btn btn-primary btn-sm" onclick="exportDataManual()">⬇ Backup herunterladen</button>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:5px">Datei wird als <em id="bp-filename-preview">${bp.filename||'TeamInsight-Backup'}-DATUM.json</em> gespeichert</div>
+            <details style="margin-top:8px">
+              <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--accent)">📖 Empfehlung: Wo soll ich Backups speichern?</summary>
+              <ul style="font-size:12px;color:var(--muted);padding-left:16px;margin-top:6px;line-height:1.9;list-style:disc">
+                <li><strong>OneDrive / iCloud / Google Drive Ordner</strong> – automatisch in die Cloud synchronisiert</li>
+                <li><strong>USB-Stick oder externe Festplatte</strong> – physische Sicherung</li>
+                <li><strong>Wichtig:</strong> Backup-Datei nie im selben Gerät wie der Browser lassen, falls das Gerät ausfällt</li>
+                <li>Benenne Dateien mit Datum z.B. <code style="background:#f0f2f5;padding:1px 5px;border-radius:3px">TeamInsight-Backup-2026-06.json</code></li>
+              </ul>
+            </details>
+          </div>
+
+          <!-- IMPORT / RESTORE -->
+          <div style="padding:12px 0">
+            <div style="font-size:13px;font-weight:500;margin-bottom:8px">📤 Daten wiederherstellen / importieren</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-sm" onclick="document.getElementById('import-file').click()" style="background:#E6F1FB;border-color:#93c5fd;color:#1e40af">📂 Backup-Datei öffnen…</button>
+              <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+            </div>
+            <details style="margin-top:8px">
+              <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--accent)">📖 Schritt-für-Schritt: Daten wiederherstellen</summary>
+              <ol style="font-size:12px;color:var(--muted);padding-left:16px;margin-top:6px;line-height:1.9">
+                <li>Klicke auf <strong>Backup-Datei öffnen</strong></li>
+                <li>Wähle deine gespeicherte <code style="background:#f0f2f5;padding:1px 5px;border-radius:3px">.json</code> Backup-Datei aus</li>
+                <li>Bestätige die Warnung – bestehende Daten werden überschrieben</li>
+                <li>Alle Daten, Teams und Einstellungen sind sofort wiederhergestellt</li>
+                <li><strong>Tipp:</strong> Vor einem Import zuerst ein aktuelles Backup machen!</li>
+              </ol>
+            </details>
+            <div style="background:#FAEEDA;border-radius:6px;padding:8px 10px;margin-top:10px;font-size:12px;color:#854F0B">
+              ⚠️ Der Import überschreibt alle aktuellen Daten. Vorher ein Backup erstellen!
+            </div>
+          </div>
+        </div>
+
+        <!-- DATEN LÖSCHEN -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">🗑️ Daten</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-danger btn-sm" onclick="resetData()">Alle Daten löschen</button>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">Löscht alle Daten unwiderruflich aus dem Browser. Vorher unbedingt ein Backup erstellen!</p>
+        </div>
+
+        <!-- DEMO -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Demo-Daten</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Beispieldaten mit 2 Teams und 3 Mitgliedern laden.</p>
+          <button class="btn btn-primary btn-sm" onclick="loadDemo()">Demo-Daten laden</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Über Team Insight</div>
+          <p style="font-size:13px;color:var(--muted)">Version ${APP_VERSION} · Multi-Team · Lokales Backup · Alle Daten bleiben auf deinem Gerät.</p>
+        </div>
+      </div>
+  `;
+}
+
+function toggleModule(key, enabled) {
+  if (!state.modules) state.modules = {};
+  state.modules[key] = enabled;
+  save();
+  renderSidebar();
+  // Re-render dashboard buttons if we're on dashboard
+  if (currentView === 'dashboard') renderDashboard();
+}
+
+function modEnabled(key) {
+  return !state.modules || state.modules[key] !== false;
+}
+
+function saveBp() {
+  state.backup.localEnabled = document.getElementById('bp-local')?.checked||false;
+  const fn = document.getElementById('bp-filename')?.value?.trim();
+  if (fn) state.backup.filename = fn;
+  const preview = document.getElementById('bp-filename-preview');
+  if (preview) preview.textContent = (state.backup.filename||'TeamInsight-Backup') + '-DATUM.json';
+  localStorage.setItem('teaminsight_v2', JSON.stringify(state));
+}
+
+function exportDataManual() {
+  const base = state.backup?.filename||'TeamInsight-Backup';
+  const filename = `${base}-${today()}.json`;
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setSyncStatus('ok', 'Gesichert');
+}
+
+function importData(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (confirm('Alle aktuellen Daten überschreiben?')) {
+        state = imported;
+        save();
+        currentTeamId = state.teams.length ? state.teams[0].id : null;
+        renderTeamSelector();
+        renderSidebar();
+        showView('dashboard');
+      }
+    } catch(err) { alert('Ungültige Datei'); }
+  };
+  reader.readAsText(file);
+}
+
+function resetData() {
+  if (!confirm('ACHTUNG: Alle Daten wirklich löschen?')) return;
+  state = {teams:[],members:[],bilas:[],tasks:[],aiHistory:[],backup:{localEnabled:false,gistEnabled:false,gistToken:'',gistId:'',onedrive:false,gdrive:false,synology:false,synologyUrl:'',synologyUser:'',synologyPass:'',synologyPath:'/teaminsight/backup.json'},nextTeamId:1,nextMemberId:1,nextBilaId:1,nextTaskId:1};
+  currentTeamId = null;
+  save();
+  renderTeamSelector();
+  renderSidebar();
+  showView('dashboard');
+}
+
+function loadDemo() {
+  if (!confirm('Demo-Daten laden? Bestehende Daten bleiben erhalten.')) return;
+  const t1 = state.nextTeamId++, t2 = state.nextTeamId++;
+  state.teams.push({id:t1,name:'RUAG C5I'},{id:t2,name:'Scrum Team Alpha'});
+  const m1=state.nextMemberId++,m2=state.nextMemberId++,m3=state.nextMemberId++;
+  state.members.push(
+    {id:m1,name:'Sarah Meier',role:'Senior Developer',since:'2023-03-01',email:'s.meier@team.ch',notes:'Eigenständig, möchte mehr Verantwortung',teamIds:[t1,t2],devGoals:[{goal:'Tech Lead vorbereiten',created:'2026-01-15',done:false}]},
+    {id:m2,name:'Jonas Weber',role:'Frontend Developer',since:'2024-09-01',email:'j.weber@team.ch',notes:'Probezeit, gutes Potential',teamIds:[t1],devGoals:[]},
+    {id:m3,name:'Priya Sharma',role:'QA Engineer',since:'2022-06-15',email:'p.sharma@team.ch',notes:'Stark in Testautomatisierung',teamIds:[t2],devGoals:[{goal:'ISTQB Advanced',created:'2025-11-01',done:false}]}
+  );
+  const b1=state.nextBilaId++,b2=state.nextBilaId++,b3=state.nextBilaId++;
+  state.bilas.push(
+    {id:b1,memberId:m1,teamId:t1,date:'2026-06-02',type:'Reguläres BILA',subject:'Q2 Retrospektive',notes:'Sarah möchte eigenständig ein Modul leiten.',agreements:'Nächsten Sprint Modul selbst führen',risks:'',followUp:'Tech-Lead-Gespräch mit HR',tags:['Karriere','Motivation'],conf:'Persönlich'},
+    {id:b2,memberId:m2,teamId:t1,date:'2026-05-20',type:'Probezeitgespräch',subject:'1-Monats-Check',notes:'Gute Fortschritte, Mühe mit Testing-Framework.',agreements:'Pair Programming 2 Wochen',risks:'Testing-Kenntnisse schwach',followUp:'In 4 Wochen prüfen',tags:['Probezeit','Blocker'],conf:'Standard'},
+    {id:b3,memberId:m3,teamId:t2,date:'2026-05-28',type:'Entwicklungsgespräch',subject:'ISTQB-Plan',notes:'Lernplan ISTQB Advanced besprochen.',agreements:'Kurs buchen bis Juni',risks:'',followUp:'Budget-Freigabe',tags:['Weiterbildung'],conf:'Standard'}
+  );
+  state.tasks.push(
+    {id:state.nextTaskId++,assignee:m1,teamId:t1,title:'Tech-Lead-Roadmap erstellen',desc:'',priority:'Mittel',status:'In Bearbeitung',due:'2026-06-20',bilaId:b1},
+    {id:state.nextTaskId++,assignee:m2,teamId:t1,title:'Testing-Framework Onboarding',desc:'Cypress Grundlagen',priority:'Hoch',status:'Offen',due:'2026-06-05',bilaId:b2},
+    {id:state.nextTaskId++,assignee:m3,teamId:t2,title:'ISTQB Kurs buchen',desc:'',priority:'Mittel',status:'Offen',due:'2026-06-30',bilaId:b3},
+    {id:state.nextTaskId++,assignee:null,teamId:t1,title:'Team-Retro Q2 vorbereiten',desc:'Miro-Board',priority:'Niedrig',status:'Offen',due:'2026-06-12',bilaId:null}
+  );
+  currentTeamId = t1;
+  save();
+  renderTeamSelector();
+  renderSidebar();
+  showView('dashboard');
+}
+
+// ============================================================
+// SETUP GUIDE
+// ============================================================
+const GUIDE_CONTENT = {
+  local: {
+    icon: '💾',
+    title: 'Lokaler Download',
+    sub: 'Kein Konto nötig – einfachste Option',
+    steps: [
+      {
+        title: 'Checkbox aktivieren',
+        text: 'Hake unter <strong>Einstellungen → Backup & Sync</strong> die Option <em>Lokaler Download</em> an.'
+      },
+      {
+        title: 'Automatisches Speichern',
+        text: 'Nach jeder Änderung in der App wird automatisch eine JSON-Datei heruntergeladen. Je nach Browser-Einstellung landet sie direkt im Download-Ordner oder es erscheint ein Speichern-Dialog.'
+      },
+      {
+        title: 'Datei aufbewahren',
+        text: 'Lege die Datei <span class="guide-code">TeamInsight_YYYY-MM-DD.json</span> an einem sicheren Ort ab – z.B. in einem OneDrive/NAS-Ordner den du bereits hast.',
+        tip: 'Tipp: Benenne die Dateien nach Datum und behalte die letzten 5 Versionen als Verlauf.'
+      },
+      {
+        title: 'Wiederherstellen',
+        text: 'Um ein Backup einzuspielen: <strong>Einstellungen → Daten → Import</strong> → Datei auswählen. Alle aktuellen Daten werden überschrieben.'
+      }
+    ]
+  },
+  gist: {
+    icon: '🐙',
+    title: 'GitHub Gist',
+    sub: 'Empfohlen – kostenlos, privat, überall erreichbar',
+    steps: [
+      {
+        title: 'GitHub-Konto erstellen (falls nicht vorhanden)',
+        text: 'Gehe zu <a href="https://github.com/signup" target="_blank">github.com/signup</a> und erstelle ein kostenloses Konto. Dauert ca. 2 Minuten.',
+        tip: 'Du brauchst kein Repo oder Code – Gist ist ein separater Dienst für einzelne Dateien.'
+      },
+      {
+        title: 'Personal Access Token erstellen',
+        text: 'Öffne <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> → <strong>Generate new token → Classic</strong>.<br>Unter <em>Note</em> schreibe z.B. <span class="guide-code">TeamInsight Backup</span>.<br>Unter <em>Expiration</em> wähle <strong>No expiration</strong>.<br>Hake nur die Checkbox <strong>gist</strong> an.<br>Klicke <strong>Generate token</strong>.',
+        warn: 'Den Token nur einmal sichtbar – sofort kopieren und in das Token-Feld in den Einstellungen einfügen!'
+      },
+      {
+        title: 'Token eintragen',
+        text: 'Gehe zu <strong>Einstellungen → Backup & Sync → GitHub Gist</strong>.<br>Hake die Checkbox an und füge den kopierten Token ins Feld <em>Personal Access Token</em> ein.<br>Das Feld <em>Gist-ID</em> bleibt leer – es wird automatisch beim ersten Backup erstellt.'
+      },
+      {
+        title: 'Ersten Backup auslösen',
+        text: 'Klicke auf <strong>Jetzt sichern</strong>. Oben rechts erscheint kurz <em>Gesichert</em>. Die Gist-ID wird automatisch gespeichert.',
+        tip: 'Danach läuft das Backup vollautomatisch nach jeder Änderung im Hintergrund.'
+      },
+      {
+        title: 'Auf anderem Gerät wiederherstellen',
+        text: 'Token und Gist-ID aus dem ersten Gerät kopieren → auf dem neuen Gerät eintragen → <strong>Jetzt laden</strong> klicken. Alle Daten werden übertragen.'
+      }
+    ]
+  },
+  onedrive: {
+    icon: '☁️',
+    title: 'Microsoft OneDrive',
+    sub: 'Über Microsoft Azure App Registration',
+    steps: [
+      {
+        title: 'Azure Portal öffnen',
+        text: 'Gehe zu <a href="https://portal.azure.com" target="_blank">portal.azure.com</a> und melde dich mit deinem Microsoft-Konto an (dasselbe wie OneDrive).'
+      },
+      {
+        title: 'App-Registrierung erstellen',
+        text: 'Suche oben nach <em>App registrations</em> → <strong>New registration</strong>.<br>Name: <span class="guide-code">TeamInsight Backup</span><br>Supported account types: <strong>Personal Microsoft accounts only</strong><br>Redirect URI: <strong>Single-page application (SPA)</strong> → <span class="guide-code">http://localhost</span><br>→ <strong>Register</strong>'
+      },
+      {
+        title: 'API-Berechtigungen hinzufügen',
+        text: 'Links auf <strong>API permissions</strong> → <strong>Add a permission</strong> → <strong>Microsoft Graph</strong> → <strong>Delegated permissions</strong>.<br>Suche und aktiviere: <span class="guide-code">Files.ReadWrite</span> und <span class="guide-code">offline_access</span>.<br>→ <strong>Add permissions</strong> → <strong>Grant admin consent</strong>',
+        warn: 'Ohne "Grant admin consent" funktioniert der Upload nicht.'
+      },
+      {
+        title: 'Application (Client) ID kopieren',
+        text: 'Auf der Übersichtsseite der App: <strong>Application (client) ID</strong> kopieren.<br>Diese ID kommt in das Feld <em>OneDrive Client-ID</em> in den TeamInsight-Einstellungen.',
+        tip: 'Die Funktion ist in Vorbereitung. Trage die Client-ID schon ein – das Update wird automatisch aktiviert.'
+      },
+      {
+        title: 'Backup testen',
+        text: 'Nach dem Update: Checkbox aktivieren → <strong>Jetzt sichern</strong>. Ein Microsoft-Login-Fenster öffnet sich. Nach der Anmeldung wird die Datei unter <span class="guide-code">OneDrive/Apps/TeamInsight/backup.json</span> gespeichert.'
+      }
+    ]
+  },
+  gdrive: {
+    icon: '📁',
+    title: 'Google Drive',
+    sub: 'Über Google Cloud Console OAuth 2.0',
+    steps: [
+      {
+        title: 'Google Cloud Console öffnen',
+        text: 'Gehe zu <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> und melde dich mit deinem Google-Konto an (dasselbe wie Google Drive).'
+      },
+      {
+        title: 'Neues Projekt erstellen',
+        text: 'Oben links auf <strong>Select a project → New Project</strong>.<br>Name: <span class="guide-code">TeamInsight</span> → <strong>Create</strong>.<br>Warte kurz und wähle das neue Projekt aus.'
+      },
+      {
+        title: 'Google Drive API aktivieren',
+        text: 'Linkes Menü: <strong>APIs & Services → Library</strong>.<br>Suche nach <span class="guide-code">Google Drive API</span> → Klicke darauf → <strong>Enable</strong>.'
+      },
+      {
+        title: 'OAuth-Zustimmungsbildschirm konfigurieren',
+        text: '<strong>APIs & Services → OAuth consent screen</strong> → <strong>External</strong> → <strong>Create</strong>.<br>App name: <span class="guide-code">TeamInsight</span>, User support email: deine E-Mail.<br>Unter <em>Scopes</em>: <strong>Add or remove scopes</strong> → <span class="guide-code">.../auth/drive.file</span> hinzufügen.<br>Unter <em>Test users</em>: deine eigene Google-Adresse hinzufügen.<br>→ <strong>Save and continue</strong>',
+        tip: 'Der Status "Testing" reicht – du musst die App nicht veröffentlichen.'
+      },
+      {
+        title: 'OAuth-Client-ID erstellen',
+        text: '<strong>APIs & Services → Credentials → Create Credentials → OAuth client ID</strong>.<br>Application type: <strong>Web application</strong>.<br>Authorized JavaScript origins: <span class="guide-code">null</span> (für lokale HTML-Datei).<br>→ <strong>Create</strong> → <strong>Client ID</strong> kopieren.'
+      },
+      {
+        title: 'Client-ID eintragen',
+        text: 'Die kopierte Client-ID in das Feld <em>Google Drive Client-ID</em> in den TeamInsight-Einstellungen einfügen.',
+        tip: 'Funktion in Vorbereitung. Trage die Client-ID schon ein – das Update aktiviert sie automatisch.'
+      }
+    ]
+  },
+  nas: {
+    icon: '🖥️',
+    title: 'Synology NAS',
+    sub: 'Über FileStation API – direkte Verbindung ins Heimnetz',
+    steps: [
+      {
+        title: 'DSM-Version prüfen',
+        text: 'Melde dich auf deinem NAS an (z.B. <span class="guide-code">http://192.168.1.x:5000</span>).<br>DSM 7.x wird empfohlen. FileStation muss installiert sein (ist standardmäßig dabei).',
+        tip: 'Du findest die DSM-Version unter Systemsteuerung → Info-Center.'
+      },
+      {
+        title: 'HTTPS aktivieren (zwingend erforderlich)',
+        text: 'Systemsteuerung → <strong>Netzwerk → DSM-Einstellungen</strong>.<br>Aktiviere <strong>HTTPS-Verbindung automatisch zu DSM umleiten</strong>.<br>Standard-HTTPS-Port ist <span class="guide-code">5001</span>.',
+        warn: 'Browser blockieren API-Aufrufe von HTTPS-Seiten zu HTTP. HTTPS auf dem NAS ist Pflicht.'
+      },
+      {
+        title: 'Benutzer für Backup anlegen (empfohlen)',
+        text: 'Systemsteuerung → <strong>Benutzer & Gruppe → Erstellen</strong>.<br>Name: z.B. <span class="guide-code">teaminsight-backup</span><br>Berechtigungen: Nur <strong>FileStation</strong> nötig.<br>Weise dem Benutzer Lese-/Schreibzugriff auf einen Ordner zu (z.B. <span class="guide-code">/homes/teaminsight</span>).',
+        tip: 'Trenne Backup-Zugangsdaten von deinem Admin-Konto – sicherer und einfacher zu widerrufen.'
+      },
+      {
+        title: 'Zielordner erstellen',
+        text: 'Öffne <strong>FileStation</strong> auf dem NAS.<br>Erstelle einen Ordner, z.B. <span class="guide-code">/teaminsight</span> oder <span class="guide-code">/homes/teaminsight-backup/backups</span>.<br>Notiere dir den vollen Pfad.'
+      },
+      {
+        title: 'CORS konfigurieren (falls nötig)',
+        text: 'Falls die Verbindung fehlschlägt: Systemsteuerung → <strong>Anwendungsportal → Umgekehrter Proxy</strong>.<br>Alternativ: Im DSM unter <em>Systemsteuerung → Terminal & SNMP → SSH aktivieren</em>, dann per SSH:<br><span class="guide-code">sudo synowebapi --exec api=SYNO.Core.Web.DSM method=set version=2 enable_cors=true</span>',
+        tip: 'Bei DSM 7.2+ ist CORS oft standardmäßig erlaubt. Erst versuchen ohne diese Konfiguration.'
+      },
+      {
+        title: 'Zugangsdaten eintragen',
+        text: 'In TeamInsight-Einstellungen:<br>URL: <span class="guide-code">https://dein-nas.local:5001</span> oder externe URL<br>Benutzername + Passwort des Backup-Benutzers<br>Pfad: <span class="guide-code">/teaminsight/backup.json</span><br>→ Checkbox aktivieren → <strong>Jetzt sichern</strong> zum Testen.'
+      }
+    ]
+  }
+};
+
+let currentGuideTab = 'gist';
+
+function openSetupGuide(tab) {
+  currentGuideTab = tab || 'gist';
+  showGuideTab(currentGuideTab);
+  openOverlay('overlay-setup-guide');
+}
+
+function showGuideTab(tab) {
+  currentGuideTab = tab;
+  // Update tab active state
+  const tabs = document.querySelectorAll('#guide-tabs .tab');
+  const tabKeys = ['gist','local','onedrive','gdrive','nas'];
+  tabs.forEach((el,i) => el.classList.toggle('active', tabKeys[i]===tab));
+  // Render content
+  const g = GUIDE_CONTENT[tab];
+  if (!g) return;
+  const cont = document.getElementById('guide-content');
+  if (!cont) return;
+  cont.innerHTML = `
+    <div class="guide-header">
+      <div class="guide-header-icon">${g.icon}</div>
+      <div>
+        <div class="guide-header-title">${g.title}</div>
+        <div class="guide-header-sub">${g.sub}</div>
+      </div>
+    </div>
+    ${g.steps.map((s,i) => `
+      <div class="guide-step">
+        <div class="guide-num">${i+1}</div>
+        <div class="guide-body">
+          <div class="guide-title">${s.title}</div>
+          <div class="guide-text">${s.text}</div>
+          ${s.tip ? `<div class="guide-tip">💡 ${s.tip}</div>` : ''}
+          ${s.warn ? `<div class="guide-warn">⚠️ ${s.warn}</div>` : ''}
+        </div>
+      </div>
+    `).join('')}
+    <div style="padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--muted)">Fragen? Die Anleitung bezieht sich auf den aktuellen Stand der jeweiligen Dienste.</span>
+      <button class="btn btn-primary btn-sm" onclick="closeOverlay('overlay-setup-guide');renderSettingsView()">Zu den Einstellungen →</button>
+    </div>
+  `;
+}
+// ============================================================
+// OVERLAY HELPERS
+// ============================================================
+function openOverlay(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeOverlay(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function closeAllOverlays() {
+  document.querySelectorAll('.overlay.open').forEach(el => el.classList.remove('open'));
+}
+// NOTE: No backdrop-click or ESC closing — modals only close via explicit buttons
+// to prevent accidental data loss.
+
+// ============================================================
+// INIT
+// ============================================================
+load();
+if (!state.teams) state.teams = [];
+if (!state.feedbacks) state.feedbacks = [];
+if (!state.modules) state.modules = {tasks:true, bilas:true, feedback:true};
+if (!state.backup) state.backup = {localEnabled: false, filename: 'TeamInsight-Backup'};
+
+// Fix nextId counters — always higher than any existing ID (guards against migration bugs)
+const maxMId = state.members.reduce((mx,m)=>Math.max(mx,m.id||0),0);
+const maxBId = state.bilas.reduce((mx,b)=>Math.max(mx,b.id||0),0);
+const maxTId = state.tasks.reduce((mx,t)=>Math.max(mx,t.id||0),0);
+const maxTeamId = state.teams.reduce((mx,t)=>Math.max(mx,t.id||0),0);
+if (state.nextMemberId <= maxMId) state.nextMemberId = maxMId + 1;
+if (state.nextBilaId   <= maxBId) state.nextBilaId   = maxBId + 1;
+if (state.nextTaskId   <= maxTId) state.nextTaskId   = maxTId + 1;
+if (state.nextTeamId   <= maxTeamId) state.nextTeamId = maxTeamId + 1;
+
+if (state.teams.length && !currentTeamId) currentTeamId = state.teams[0].id;
+
+if (!state.teams.length) {
+  state.teams.push({id:state.nextTeamId++, name:'Mein Team'});
+  currentTeamId = state.teams[0].id;
+  save();
+}
+
+renderTeamSelector();
+renderSidebar();
+renderDashboard();
+</script>
+</body>
+</html>
