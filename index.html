@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Team Insight v4.6</title>
+<title>Team Insight v4.7</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23185FA5'/%3E%3Ccircle cx='16' cy='11' r='4' fill='%23fff'/%3E%3Cpath d='M8 25c0-4.4 3.6-8 8-8s8 3.6 8 8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -286,6 +286,24 @@ textarea{resize:vertical;min-height:70px}
 .settings-section-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .settings-section-hd:first-child{margin-top:0}
 
+
+
+/* COLLAPSIBLE SETTINGS SECTIONS */
+.sett-section{border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;background:var(--card)}
+.sett-hd{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;user-select:none;transition:background .15s}
+.sett-hd:hover{background:var(--bg)}
+.sett-hd-icon{font-size:16px;flex-shrink:0}
+.sett-hd-title{font-size:13px;font-weight:600;flex:1;color:var(--text)}
+.sett-hd-badge{font-size:11px;color:var(--muted);margin-right:4px}
+.sett-hd-chevron{font-size:12px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.sett-section.open .sett-hd-chevron{transform:rotate(90deg)}
+.sett-body{display:none;padding:0 16px 16px;border-top:1px solid var(--border)}
+.sett-section.open .sett-body{display:block}
+.sett-section.open .sett-hd{background:var(--bg)}
+/* danger section */
+.sett-section.danger-section{border-color:var(--danger)}
+.sett-section.danger-section .sett-hd-title{color:var(--danger)}
+.sett-section.danger-section .sett-hd:hover{background:#fff5f5}
 
 /* COLLAPSIBLE FILTER */
 .filter-toggle-btn{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:7px 12px;font-size:12px;font-weight:500;cursor:pointer;color:var(--muted);margin-bottom:10px;transition:all .15s}
@@ -651,7 +669,7 @@ const BILA_TYPES = ['Reguläres BILA','Probezeitgespräch','Jahresgespräch','En
 const PRIOS = ['Hoch','Mittel','Niedrig'];
 const CONF_LEVELS = ['Standard','Persönlich','Vertraulich','HR-relevant'];
 
-const APP_VERSION = '4.6';
+const APP_VERSION = '4.7';
 
 const DRIVE_FILENAME = 'teaminsight-data.json';
 
@@ -1012,7 +1030,7 @@ function deleteTeam(id) {
 function renderSidebar() {
   renderTeamSelector();
   // Apply module visibility to nav items
-  ['tasks','bilas','feedback','ai','devgoals'].forEach(key => {
+  ['tasks','bilas','feedback','ai','devgoals','followups','search'].forEach(key => {
     const el = document.getElementById('nav-'+key);
     if (el) el.style.display = modEnabled(key) ? '' : 'none';
   });
@@ -3062,101 +3080,77 @@ function renderSettingsView() {
 
   document.getElementById('content').innerHTML = `
     <div style="max-width:680px">
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Klicke auf einen Bereich um ihn zu öffnen oder zu schliessen.</p>
 
-      <!-- ══ GOOGLE DRIVE BACKUP (first — most critical) ══ -->
-      <div class="settings-section-hd">☁️ Datensicherung</div>
-      <div style="border-radius:14px;overflow:hidden;border:1.5px solid #e0e7ff;margin-bottom:20px">
-        <div style="background:linear-gradient(135deg,#1a1d23 0%,#2d3748 100%);padding:18px 20px;display:flex;align-items:center;gap:14px">
-          <div style="width:40px;height:40px;border-radius:50%;background:#4285f4;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M6 20.5l3-5.2h10l-3 5.2z"/><path fill="#fff" opacity=".7" d="M2 15.3L5 10l5 8.7H4z"/><path fill="#fff" opacity=".5" d="M15 10H9L6 5h9z"/></svg>
-          </div>
-          <div style="flex:1">
-            <div style="font-size:15px;font-weight:700;color:#fff">Datensicherung</div>
-            <div style="font-size:12px;color:#94a3b8;margin-top:2px">Sichere alle Daten in Google Drive oder lokal</div>
-          </div>
-          ${isSignedIn()
-            ? `<span style="background:#22c55e;color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px">● Verbunden</span>`
-            : `<span style="background:#6b7280;color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px">Nicht angemeldet</span>`}
+      <!-- ══ DATENSICHERUNG ══ -->
+      <div class="sett-section open" id="sett-backup">
+        <div class="sett-hd" onclick="toggleSett('sett-backup')">
+          <span class="sett-hd-icon">☁️</span>
+          <span class="sett-hd-title">Datensicherung</span>
+          <span class="sett-hd-badge">${isSignedIn()?'● Google Drive verbunden':'Nicht angemeldet'}</span>
+          <span class="sett-hd-chevron">▶</span>
         </div>
-
-        <div style="padding:18px">
+        <div class="sett-body">
+        <div style="border-radius:12px;overflow:hidden;border:1.5px solid #e0e7ff;margin-top:4px">
+        <div style="background:linear-gradient(135deg,#1a1d23 0%,#2d3748 100%);padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <div style="width:34px;height:34px;border-radius:50%;background:#4285f4;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M6 20.5l3-5.2h10l-3 5.2z"/><path fill="#fff" opacity=".7" d="M2 15.3L5 10l5 8.7H4z"/><path fill="#fff" opacity=".5" d="M15 10H9L6 5h9z"/></svg>
+          </div>
+          <div style="flex:1"><div style="font-size:14px;font-weight:700;color:#fff">Datensicherung</div><div style="font-size:11px;color:#94a3b8">Sichere alle Daten in Google Drive oder lokal</div></div>
+          ${isSignedIn()?'<span style="background:#22c55e;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">● Verbunden</span>':'<span style="background:#6b7280;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Nicht angemeldet</span>'}
+        </div>
+        <div style="padding:14px">
           <!-- GOOGLE DRIVE -->
-          <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:16px;margin-bottom:12px">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-              <svg width="30" height="30" viewBox="0 0 24 24"><path fill="#4285f4" d="M6 20.5l3-5.2h10l-3 5.2z"/><path fill="#0f9d58" d="M2 15.3L5 10l5 8.7H4z"/><path fill="#ffbb00" d="M15 10H9L6 5h9z"/></svg>
+          <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:14px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <svg width="26" height="26" viewBox="0 0 24 24"><path fill="#4285f4" d="M6 20.5l3-5.2h10l-3 5.2z"/><path fill="#0f9d58" d="M2 15.3L5 10l5 8.7H4z"/><path fill="#ffbb00" d="M15 10H9L6 5h9z"/></svg>
               <div style="flex:1">
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span style="font-size:14px;font-weight:600;color:#166534">Google Drive</span>
-                  <span style="background:#15803d;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">EMPFOHLEN</span>
-                </div>
-                <div style="font-size:12px;color:#16a34a;margin-top:2px">Automatisch · privat · kostenlos · PC + Handy</div>
+                <div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:600;color:#166534">Google Drive</span><span style="background:#15803d;color:#fff;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px">EMPFOHLEN</span></div>
+                <div style="font-size:11px;color:#16a34a">Automatisch · privat · kostenlos</div>
               </div>
             </div>
-
             ${isSignedIn() ? `
-              <div style="background:#dcfce7;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px">
-                ${gUser&&gUser.picture ? `<img src="${gUser.picture}" style="width:32px;height:32px;border-radius:50%;flex-shrink:0">` : ''}
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:13px;font-weight:600;color:#15803d">${gUser&&gUser.name||'Angemeldet'} ✓</div>
-                  <div style="font-size:11px;color:#16a34a">${gUser&&gUser.email||''}</div>
-                  <div style="font-size:11px;color:#16a34a;margin-top:2px">Letzte Synchronisation: ${lastSync}</div>
-                </div>
-                <button onclick="googleSignOut()" style="background:none;border:1px solid #16a34a;color:#15803d;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;flex-shrink:0">Abmelden</button>
+              <div style="background:#dcfce7;border-radius:7px;padding:9px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                ${gUser&&gUser.picture?`<img src="${gUser.picture}" style="width:28px;height:28px;border-radius:50%;flex-shrink:0">`:''}
+                <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#15803d">${gUser&&gUser.name||'Angemeldet'} ✓</div><div style="font-size:11px;color:#16a34a">${gUser&&gUser.email||''} · Letzte Sync: ${lastSync}</div></div>
+                <button onclick="googleSignOut()" style="background:none;border:1px solid #16a34a;color:#15803d;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0">Abmelden</button>
               </div>
-              <button onclick="loadFromDrive().then(()=>{renderTeamSelector();renderSidebar();renderSettingsView();showToast('✓ Daten geladen');})" style="background:#fff;border:1.5px solid #86efac;color:#15803d;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;width:100%">⟳ Jetzt von Google Drive laden</button>
+              <button onclick="loadFromDrive().then(()=>{renderTeamSelector();renderSidebar();renderSettingsView();showToast('✓ Daten geladen');})" style="background:#fff;border:1.5px solid #86efac;color:#15803d;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;width:100%">⟳ Jetzt von Google Drive laden</button>
             ` : `
-              <p style="font-size:13px;color:#166534;margin-bottom:14px;line-height:1.6">Klicke auf «Mit Google anmelden» — dein Browser öffnet ein Google-Fenster. Wähle dein Konto und erlaube den Zugriff.</p>
-              <button onclick="googleSignIn()" style="width:100%;background:#4285f4;color:#fff;border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
-                <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#fff" d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z"/><path fill="#fff" d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#fff" d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z"/><path fill="#fff" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z"/></svg>
+              <p style="font-size:12px;color:#166534;margin-bottom:12px;line-height:1.6">Klicke auf «Mit Google anmelden» — dein Browser öffnet ein Google-Fenster.</p>
+              <button onclick="googleSignIn()" style="width:100%;background:#4285f4;color:#fff;border:none;border-radius:7px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+                <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#fff" d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z"/><path fill="#fff" d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#fff" d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z"/><path fill="#fff" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z"/></svg>
                 Mit Google anmelden
               </button>
-              <div style="text-align:center;font-size:11px;color:#16a34a;margin-top:8px">Die App speichert Daten nur in deiner eigenen Google Drive. Niemand sonst hat Zugriff.</div>
+              <div style="text-align:center;font-size:11px;color:#16a34a;margin-top:6px">Daten werden nur in deiner eigenen Google Drive gespeichert.</div>
             `}
-
-            <details style="margin-top:14px">
-              <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#15803d;list-style:none;display:flex;align-items:center;gap:6px;padding:4px 0">
-                <span style="width:18px;height:18px;border-radius:50%;background:#15803d;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">?</span>
+            <details style="margin-top:10px">
+              <summary style="cursor:pointer;font-size:11px;font-weight:600;color:#15803d;list-style:none;display:flex;align-items:center;gap:5px;padding:3px 0">
+                <span style="width:16px;height:16px;border-radius:50%;background:#15803d;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">?</span>
                 ⚙️ Setup-Anleitung (einmalig, nur für App-Betreiber)
               </summary>
-              <div style="margin-top:10px;background:#eff6ff;border-radius:8px;padding:14px">
-                <div style="background:#fef9c3;border-radius:6px;padding:8px 10px;font-size:12px;color:#92400e;margin-bottom:12px">⚠️ Nur <strong>du</strong> musst diese Schritte einmal ausführen. Danach können alle «Mit Google anmelden» klicken.</div>
-                ${[
-                  ['🐙 App auf GitHub Pages hosten','<a href="https://github.com" target="_blank" style="color:var(--accent)">github.com</a> → Konto erstellen → «New repository» · Name: <code style="background:#fff;padding:1px 5px;border-radius:3px">team-insight</code> (lowercase!) · Public<br>«uploading an existing file» → <code>index.html</code> hochladen → «Settings» → «Pages» → Branch: main<br>✅ URL: <code>https://deinname.github.io/team-insight/</code>'],
-                  ['🔵 Google Cloud + Drive API','<a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent)">console.cloud.google.com</a> → «New Project» → «APIs & Services» → «Library» → <strong>Google Drive API</strong> → Enable'],
-                  ['📋 OAuth Consent Screen','«APIs & Services» → «Google Auth Platform» → External → <code>drive.appdata</code> Scope → «<strong>Publish App</strong>» ← wichtig!'],
-                  ['🔑 OAuth Client ID','«Credentials» → «Create Credentials» → «OAuth client ID» · Typ: Web application<br>JS Origins: <code>https://deinname.github.io</code><br>Redirect URIs: <code>https://deinname.github.io/team-insight/</code> (trailing slash!)'],
-                  ['⚙️ Client ID eintragen','Client ID unten einfügen → Speichern → index.html neu hochladen'],
-                ].map(([t,d],i)=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #dbeafe">
-                  <div style="width:22px;height:22px;border-radius:50%;background:#1e40af;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
-                  <div><strong style="font-size:12px">${t}</strong><div style="font-size:12px;color:#4b5563;margin-top:3px;line-height:1.7">${d}</div></div>
-                </div>`).join('')}
-                <div style="margin-top:12px;font-size:11px;line-height:2;color:#4b5563">
-                  <strong style="color:#991b1b">Häufige Fehler:</strong><br>
-                  <span style="color:var(--danger);font-weight:500">redirect_uri_mismatch</span> – URL exakt mit trailing slash<br>
-                  <span style="color:var(--danger);font-weight:500">access_denied 403</span> – «Publish App» vergessen<br>
-                  <span style="color:var(--danger);font-weight:500">404 GitHub</span> – Datei muss <code>index.html</code> heissen<br>
-                  <span style="color:var(--danger);font-weight:500">Invalid domain</span> – «Authorized domains» in Branding leer lassen
-                </div>
+              <div style="margin-top:8px;background:#eff6ff;border-radius:8px;padding:12px;font-size:12px">
+                <div style="background:#fef9c3;border-radius:5px;padding:7px 9px;color:#92400e;margin-bottom:10px">⚠️ Nur <strong>du</strong> musst diese Schritte einmal ausführen.</div>
+                ${[['🐙 GitHub Pages','github.com → Repo «team-insight» (lowercase, Public) → index.html hochladen → Settings → Pages → Branch main'],['🔵 Google Cloud + Drive API','console.cloud.google.com → New Project → APIs & Services → Library → Google Drive API → Enable'],['📋 OAuth Consent Screen','Google Auth Platform → External → drive.appdata Scope → «Publish App» ← wichtig!'],['🔑 OAuth Client ID','Credentials → Create → OAuth client ID · Web application · JS Origins: https://deinname.github.io · Redirect URI: https://deinname.github.io/team-insight/ (trailing slash!)'],['⚙️ Client ID eintragen','Client ID unten einfügen → Speichern → index.html neu hochladen']].map(([t,d],i)=>`<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #dbeafe"><div style="width:18px;height:18px;border-radius:50%;background:#1e40af;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div><div><strong>${t}:</strong> ${d}</div></div>`).join('')}
+                <div style="margin-top:8px;font-size:11px;color:#4b5563;line-height:1.8"><strong style="color:#991b1b">Fehler:</strong> redirect_uri_mismatch = trailing slash fehlt · access_denied 403 = Publish App vergessen · 404 GitHub = Datei heisst nicht index.html</div>
               </div>
             </details>
-
-            <div style="margin-top:14px;padding-top:14px;border-top:1px solid #86efac">
-              <label style="font-size:12px;font-weight:600;color:#15803d;display:block;margin-bottom:6px">Google Client ID</label>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <input type="text" id="s-clientid" value="${(s.clientId||'')}" placeholder="123456789-xxx.apps.googleusercontent.com" style="flex:1;min-width:200px;font-size:12px;border:1px solid #86efac;border-radius:6px;padding:8px 10px;background:#fff">
-                <button onclick="saveClientId()" style="background:#15803d;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">💾 Speichern & Neu laden</button>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #86efac">
+              <label style="font-size:11px;font-weight:600;color:#15803d;display:block;margin-bottom:5px">Google Client ID</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <input type="text" id="s-clientid" value="${(s.clientId||'')}" placeholder="123456789-xxx.apps.googleusercontent.com" style="flex:1;min-width:180px;font-size:12px;border:1px solid #86efac;border-radius:6px;padding:7px 9px;background:#fff">
+                <button onclick="saveClientId()" style="background:#15803d;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">💾 Speichern & Neu laden</button>
               </div>
             </div>
           </div>
-
           <!-- LOCAL BACKUP -->
-          <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:12px;padding:16px">
-            <div style="font-size:14px;font-weight:600;color:#92400e;margin-bottom:6px">📁 Lokaler Export / Import</div>
-            <div style="font-size:12px;color:#b45309;margin-bottom:12px">Als Sicherheitskopie oder für Geräte ohne Google-Anmeldung.</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-              <input type="text" id="s-backupname" value="${s.backupFilename||'TeamInsight-Backup'}" style="flex:1;min-width:150px;font-size:12px;padding:7px 10px;border:1px solid #fcd34d;border-radius:6px;background:#fff" onchange="saveBackupName()" placeholder="Dateiname">
-              <button onclick="localBackup()" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">📥 Exportieren (.json)</button>
-              <button onclick="document.getElementById('import-file-s').click()" style="background:#fff;border:1.5px solid #fcd34d;color:#92400e;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer">📤 Importieren</button>
+          <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:14px">
+            <div style="font-size:13px;font-weight:600;color:#92400e;margin-bottom:5px">📁 Lokaler Export / Import</div>
+            <div style="font-size:12px;color:#b45309;margin-bottom:10px">Als Sicherheitskopie oder ohne Google-Anmeldung.</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+              <input type="text" id="s-backupname" value="${s.backupFilename||'TeamInsight-Backup'}" style="flex:1;min-width:130px;font-size:12px;padding:6px 8px;border:1px solid #fcd34d;border-radius:6px;background:#fff" onchange="saveBackupName()" placeholder="Dateiname">
+              <button onclick="localBackup()" style="background:#d97706;color:#fff;border:none;border-radius:7px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer">📥 Exportieren</button>
+              <button onclick="document.getElementById('import-file-s').click()" style="background:#fff;border:1.5px solid #fcd34d;color:#92400e;border-radius:7px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer">📤 Importieren</button>
               <input type="file" id="import-file-s" accept=".json" style="display:none" onchange="importLocalData(event)">
             </div>
             <div style="display:flex;align-items:center;gap:8px">
@@ -3165,156 +3159,189 @@ function renderSettingsView() {
             </div>
           </div>
         </div>
+        </div>
+        </div>
       </div>
 
       <!-- ══ TEAMS ══ -->
-      <div class="settings-section-hd">👥 Teams</div>
-      <div class="card" style="margin-bottom:20px">
-        <div class="section-head"><span class="card-title">Teams (${state.teams.length})</span><button class="btn btn-primary btn-sm" onclick="openTeamModal()">+ Team</button></div>
-        ${state.teams.length===0
-          ? '<div style="color:var(--muted);font-size:13px">Noch keine Teams angelegt.</div>'
-          : state.teams.map(t=>`<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f2f5;gap:10px">
-              <div style="flex:1;min-width:0">
-                <span style="font-size:13px;font-weight:500">${t.name}</span>
-                <span style="font-size:11px;color:var(--muted);margin-left:8px">${state.members.filter(m=>(m.teamIds||[]).includes(t.id)).length} Mitglieder · ${state.bilas.filter(b=>b.teamId===t.id).length} Gespräche</span>
-                ${t.notes?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${t.notes}</div>`:''}
-              </div>
-              <button class="btn btn-sm" onclick="openTeamModal(${t.id})">Bearbeiten</button>
-            </div>`).join('')}
+      <div class="sett-section" id="sett-teams">
+        <div class="sett-hd" onclick="toggleSett('sett-teams')">
+          <span class="sett-hd-icon">👥</span>
+          <span class="sett-hd-title">Teams</span>
+          <span class="sett-hd-badge">${state.teams.length} Team${state.teams.length!==1?'s':''}</span>
+          <span class="sett-hd-chevron">▶</span>
+        </div>
+        <div class="sett-body">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px;margin-top:10px"><button class="btn btn-primary btn-sm" onclick="openTeamModal()">+ Team</button></div>
+          ${state.teams.length===0?'<div style="color:var(--muted);font-size:13px;padding:8px 0">Noch keine Teams angelegt.</div>':
+          state.teams.map(t=>`<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f2f5;gap:10px">
+            <div style="flex:1;min-width:0"><span style="font-size:13px;font-weight:500">${t.name}</span>
+            <span style="font-size:11px;color:var(--muted);margin-left:8px">${state.members.filter(m=>(m.teamIds||[]).includes(t.id)).length} Mitglieder · ${state.bilas.filter(b=>b.teamId===t.id).length} Gespräche</span>
+            ${t.notes?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${t.notes}</div>`:''}</div>
+            <button class="btn btn-sm" onclick="openTeamModal(${t.id})">Bearbeiten</button>
+          </div>`).join('')}
+        </div>
       </div>
 
       <!-- ══ MODULE ══ -->
-      <div class="settings-section-hd">🧩 Module</div>
-      <div class="card" style="margin-bottom:20px">
-        <div class="card-title" style="margin-bottom:4px">Module ein-/ausschalten</div>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Deaktivierte Module werden aus der Navigation und dem Dashboard ausgeblendet.</p>
-        ${[
-          {key:'tasks',icon:'✅',label:'Aufgaben',sub:'Aufgabenverwaltung'},
-          {key:'bilas',icon:'📅',label:'Gespräche',sub:'BILA-Verwaltung und Gesprächs-Tab'},
-          {key:'feedback',icon:'💬',label:'Feedback-Tracking',sub:'Feedback erfassen und tracken'},
-          {key:'devgoals',icon:'🎯',label:'Entwicklungsziele',sub:'Ziele, Subtasks und Fortschritt'},
-          {key:'ai',icon:'🤖',label:'KI-Assistent',sub:'KI-gestützte Analysen und Antworten'},
-        ].map(m=>`<div style="display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid #f0f2f5">
-          <input type="checkbox" id="mod-${m.key}" ${(state.modules||{})[m.key]!==false?'checked':''} onchange="toggleModule('${m.key}',this.checked)" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer;accent-color:var(--accent)">
-          <div style="flex:1"><div style="font-size:13px;font-weight:500">${m.icon} ${m.label}</div><div style="font-size:12px;color:var(--muted)">${m.sub}</div></div>
-          <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;${(state.modules||{})[m.key]!==false?'background:#EAF3DE;color:#3B6D11':'background:#F1EFE8;color:#5F5E5A'}">${(state.modules||{})[m.key]!==false?'Aktiv':'Inaktiv'}</span>
-        </div>`).join('')}
+      <div class="sett-section" id="sett-modules">
+        <div class="sett-hd" onclick="toggleSett('sett-modules')">
+          <span class="sett-hd-icon">🧩</span>
+          <span class="sett-hd-title">Module</span>
+          <span class="sett-hd-badge">${Object.values(state.modules||{}).filter(Boolean).length} aktiv</span>
+          <span class="sett-hd-chevron">▶</span>
+        </div>
+        <div class="sett-body">
+          <p style="font-size:12px;color:var(--muted);margin:10px 0">Deaktivierte Module werden aus der Navigation ausgeblendet.</p>
+          ${[
+            {key:'tasks',    icon:'✅', label:'Aufgaben',          sub:'Aufgabenverwaltung und Aufgaben-Tab'},
+            {key:'bilas',    icon:'📅', label:'Gespräche',          sub:'BILA-Verwaltung und Gesprächs-Tab'},
+            {key:'feedback', icon:'💬', label:'Feedback-Tracking',  sub:'Feedback erfassen und tracken'},
+            {key:'devgoals', icon:'🎯', label:'Entwicklungsziele',  sub:'Ziele, Subtasks und Fortschritt'},
+            {key:'followups',icon:'🔁', label:'Follow-ups',          sub:'Follow-up Tracker und Erinnerungen'},
+            {key:'search',   icon:'🔍', label:'Suche',              sub:'Globale Suche (Topbar + Suchseite)'},
+            {key:'ai',       icon:'🤖', label:'KI-Assistent',       sub:'KI-gestützte Analysen und Antworten'},
+          ].map(m=>`<div style="display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid #f0f2f5">
+            <input type="checkbox" id="mod-${m.key}" ${(state.modules||{})[m.key]!==false?'checked':''} onchange="toggleModule('${m.key}',this.checked)" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer;accent-color:var(--accent)">
+            <div style="flex:1"><div style="font-size:13px;font-weight:500">${m.icon} ${m.label}</div><div style="font-size:12px;color:var(--muted)">${m.sub}</div></div>
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;align-self:center;flex-shrink:0;${(state.modules||{})[m.key]!==false?'background:#EAF3DE;color:#3B6D11':'background:#F1EFE8;color:#5F5E5A'}">${(state.modules||{})[m.key]!==false?'Aktiv':'Inaktiv'}</span>
+          </div>`).join('')}
+        </div>
       </div>
 
       <!-- ══ DASHBOARD & SPRACHE ══ -->
-      <div class="settings-section-hd">🖥️ Dashboard & Sprache</div>
-      <div class="card" style="margin-bottom:20px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
-          <div>
-            <div style="font-size:13px;font-weight:500">Dashboard-Widgets</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px">${getWidgetOrder().length} von ${WIDGET_DEFS.length} Karten aktiv</div>
-          </div>
-          <button class="btn btn-sm" onclick="openWidgetConfig()">⚙ Widgets anpassen</button>
+      <div class="sett-section" id="sett-dashboard">
+        <div class="sett-hd" onclick="toggleSett('sett-dashboard')">
+          <span class="sett-hd-icon">🖥️</span>
+          <span class="sett-hd-title">Dashboard & Sprache</span>
+          <span class="sett-hd-badge">${(s.lang||'de').toUpperCase()} · ${getWidgetOrder().length}/${WIDGET_DEFS.length} Widgets</span>
+          <span class="sett-hd-chevron">▶</span>
         </div>
-        <div style="border-top:1px solid var(--border);padding-top:14px">
-          <div style="font-size:13px;font-weight:500;margin-bottom:8px">Sprache / Language</div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-sm ${lang==='de'?'btn-primary':''}" onclick="setLang('de')">🇩🇪 Deutsch</button>
-            <button class="btn btn-sm ${lang==='en'?'btn-primary':''}" onclick="setLang('en')">🇬🇧 English</button>
+        <div class="sett-body" style="padding-top:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+            <div><div style="font-size:13px;font-weight:500">Dashboard-Widgets</div><div style="font-size:12px;color:var(--muted)">${getWidgetOrder().length} von ${WIDGET_DEFS.length} aktiv</div></div>
+            <button class="btn btn-sm" onclick="openWidgetConfig()">⚙ Widgets anpassen</button>
           </div>
-        </div>
-        <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px">
-          <div style="font-size:13px;font-weight:500;margin-bottom:8px">Standard-Einstellungen für neue Mitglieder</div>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <label style="font-size:12px;color:var(--muted)">Standard BILA-Häufigkeit:</label>
-            <select id="s-default-bilafreq" onchange="saveDefaultBilaFreq()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px">
-              ${[1,2,3,4,6,8,12].map(w=>`<option value="${w}" ${(s.defaultBilaFreq||4)===w?'selected':''}>${w} Woche${w===1?'':'n'}</option>`).join('')}
-            </select>
-            <label style="font-size:12px;color:var(--muted)">Standard Aufgaben-Priorität:</label>
-            <select id="s-default-prio" onchange="saveDefaultPrio()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px">
-              ${['Hoch','Mittel','Niedrig'].map(p=>`<option ${(s.defaultPrio||'Mittel')===p?'selected':''}>${p}</option>`).join('')}
-            </select>
+          <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px">
+            <div style="font-size:13px;font-weight:500;margin-bottom:8px">Sprache</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm ${(s.lang||'de')==='de'?'btn-primary':''}" onclick="setLang('de')">🇩🇪 Deutsch</button>
+              <button class="btn btn-sm ${(s.lang||'de')==='en'?'btn-primary':''}" onclick="setLang('en')">🇬🇧 English</button>
+            </div>
           </div>
-        </div>
-        <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px;display:flex;align-items:flex-start;gap:12px">
-          <input type="checkbox" id="s-privacy" ${s.privacyMode?'checked':''} onchange="savePrivacyMode()" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer;accent-color:var(--accent)">
-          <div>
-            <div style="font-size:13px;font-weight:500">🔒 Datenschutz-Modus</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px">Vertrauliche Felder (private Notizen, Notfallkontakte, Familienstand) werden ausgegraut dargestellt – nützlich wenn jemand zuschaut.</div>
+          <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px">
+            <div style="font-size:13px;font-weight:500;margin-bottom:8px">Standards für neue Mitglieder / Aufgaben</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <label style="font-size:12px;color:var(--muted)">BILA-Häufigkeit:</label>
+              <select id="s-default-bilafreq" onchange="saveDefaultBilaFreq()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px">
+                ${[1,2,3,4,6,8,12].map(w=>`<option value="${w}" ${(s.defaultBilaFreq||4)===w?'selected':''}>${w} Woche${w===1?'':'n'}</option>`).join('')}
+              </select>
+              <label style="font-size:12px;color:var(--muted)">Aufgaben-Priorität:</label>
+              <select id="s-default-prio" onchange="saveDefaultPrio()" style="font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px">
+                ${['Hoch','Mittel','Niedrig'].map(p=>`<option ${(s.defaultPrio||'Mittel')===p?'selected':''}>${p}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;align-items:flex-start;gap:12px">
+            <input type="checkbox" id="s-privacy" ${s.privacyMode?'checked':''} onchange="savePrivacyMode()" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;cursor:pointer;accent-color:var(--accent)">
+            <div><div style="font-size:13px;font-weight:500">🔒 Datenschutz-Modus</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Vertrauliche Felder werden ausgegraut – nützlich wenn jemand zuschaut.</div></div>
           </div>
         </div>
       </div>
 
       <!-- ══ STATISTIKEN ══ -->
-      <div class="settings-section-hd">📊 Statistiken</div>
-      <div class="card" style="margin-bottom:20px">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px">
-          <div class="metric"><div class="metric-label">Teams</div><div class="metric-val">${state.teams.length}</div></div>
-          <div class="metric"><div class="metric-label">Mitglieder</div><div class="metric-val">${totalMembers}</div></div>
-          <div class="metric"><div class="metric-label">Gespräche</div><div class="metric-val">${totalBilas}</div></div>
-          <div class="metric"><div class="metric-label">Ø BILA/MA</div><div class="metric-val">${avgBila}</div></div>
-          <div class="metric"><div class="metric-label">Aufgaben offen</div><div class="metric-val ${openTasks>5?'warn':''}">${openTasks}</div></div>
-          <div class="metric"><div class="metric-label">Aufgaben erledigt</div><div class="metric-val good">${doneTasks}</div></div>
-          <div class="metric"><div class="metric-label">Feedback</div><div class="metric-val">${totalFbs}</div></div>
-          <div class="metric"><div class="metric-label">Entwicklungsziele</div><div class="metric-val">${totalGoals} <span style="font-size:12px;color:var(--success)">/ ${achievedGoals} ✓</span></div></div>
-          <div class="metric"><div class="metric-label">Follow-ups</div><div class="metric-val ${openFu?'warn':''}">${openFu} offen</div></div>
-          <div class="metric"><div class="metric-label">Datengrösse</div><div class="metric-val" style="font-size:14px">${dataSize} KB</div></div>
+      <div class="sett-section" id="sett-stats">
+        <div class="sett-hd" onclick="toggleSett('sett-stats')">
+          <span class="sett-hd-icon">📊</span>
+          <span class="sett-hd-title">Statistiken</span>
+          <span class="sett-hd-badge">${totalMembers} MA · ${totalBilas} BILAs · ${openTasks} offene Aufgaben</span>
+          <span class="sett-hd-chevron">▶</span>
         </div>
-        <div style="font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px">
-          Letzte Google Drive Synchronisation: <strong>${lastSync}</strong>
+        <div class="sett-body" style="padding-top:14px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px">
+            <div class="metric"><div class="metric-label">Teams</div><div class="metric-val">${state.teams.length}</div></div>
+            <div class="metric"><div class="metric-label">Mitglieder</div><div class="metric-val">${totalMembers}</div></div>
+            <div class="metric"><div class="metric-label">Gespräche</div><div class="metric-val">${totalBilas}</div></div>
+            <div class="metric"><div class="metric-label">Ø BILA/MA</div><div class="metric-val">${avgBila}</div></div>
+            <div class="metric"><div class="metric-label">Aufgaben offen</div><div class="metric-val ${openTasks>5?'warn':''}">${openTasks}</div></div>
+            <div class="metric"><div class="metric-label">Erledigt</div><div class="metric-val good">${doneTasks}</div></div>
+            <div class="metric"><div class="metric-label">Feedback</div><div class="metric-val">${totalFbs}</div></div>
+            <div class="metric"><div class="metric-label">Entwicklungsziele</div><div class="metric-val">${totalGoals}<span style="font-size:11px;color:var(--success)"> / ${achievedGoals} ✓</span></div></div>
+            <div class="metric"><div class="metric-label">Follow-ups offen</div><div class="metric-val ${openFu?'warn':''}">${openFu}</div></div>
+            <div class="metric"><div class="metric-label">Datengrösse</div><div class="metric-val" style="font-size:14px">${dataSize} KB</div></div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px">Letzte Google Drive Sync: <strong>${lastSync}</strong></div>
         </div>
       </div>
 
-      <!-- ══ ERWEITERT / ENTWICKLER ══ -->
-      <div class="settings-section-hd">🔧 Erweitert</div>
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-title" style="margin-bottom:4px">Demo-Daten</div>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Beispieldaten laden um die App auszuprobieren. Bestehende Daten bleiben erhalten.</p>
-        <button class="btn btn-primary btn-sm" onclick="loadDemo()">Demo-Daten laden</button>
+      <!-- ══ ERWEITERT ══ -->
+      <div class="sett-section" id="sett-advanced">
+        <div class="sett-hd" onclick="toggleSett('sett-advanced')">
+          <span class="sett-hd-icon">🔧</span>
+          <span class="sett-hd-title">Erweitert</span>
+          <span class="sett-hd-chevron">▶</span>
+        </div>
+        <div class="sett-body" style="padding-top:14px">
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px">Demo-Daten</div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Beispieldaten laden um die App auszuprobieren. Bestehende Daten bleiben erhalten.</p>
+          <button class="btn btn-primary btn-sm" onclick="loadDemo()">Demo-Daten laden</button>
+        </div>
       </div>
 
       <!-- ══ GEFAHRENZONE ══ -->
-      <div class="settings-section-hd" style="color:var(--danger)">⚠️ Gefahrenzone</div>
-      <div class="danger-zone" style="margin-bottom:14px">
-        <div class="card-title" style="margin-bottom:8px">Alle Daten löschen</div>
-        <p style="font-size:13px;color:#7f1d1d;margin-bottom:12px;line-height:1.6">
-          Löscht <strong>alle Teams, Mitglieder, Gespräche, Aufgaben, Feedback und Ziele</strong> unwiderruflich aus dem Browser.<br>
-          Empfehlung: Zuerst ein Backup exportieren!
-        </p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button onclick="localBackup()" style="background:#fff;border:1.5px solid #fca5a5;color:#dc2626;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">📥 Backup vor dem Löschen</button>
-          <button class="btn btn-danger btn-sm" onclick="resetData()">🗑 Alle Daten löschen…</button>
+      <div class="sett-section danger-section" id="sett-danger">
+        <div class="sett-hd" onclick="toggleSett('sett-danger')">
+          <span class="sett-hd-icon">⚠️</span>
+          <span class="sett-hd-title">Gefahrenzone</span>
+          <span class="sett-hd-chevron">▶</span>
+        </div>
+        <div class="sett-body" style="padding-top:14px">
+          <p style="font-size:13px;color:#7f1d1d;margin-bottom:12px;line-height:1.6">
+            Löscht <strong>alle Teams, Mitglieder, Gespräche, Aufgaben, Feedback und Ziele</strong> unwiderruflich.<br>
+            Zuerst ein Backup exportieren!
+          </p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button onclick="localBackup()" style="background:#fff;border:1.5px solid #fca5a5;color:#dc2626;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">📥 Backup vor dem Löschen</button>
+            <button class="btn btn-danger btn-sm" onclick="resetData()">🗑 Alle Daten löschen…</button>
+          </div>
         </div>
       </div>
 
       <!-- ══ ÜBER ══ -->
-      <div class="card" style="margin-bottom:20px">
-        <div class="section-head"><span class="card-title">Über Team Insight</span><span style="font-size:12px;color:var(--muted)">v${APP_VERSION}</span></div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.8">
-          <strong style="color:var(--text)">Team Insight</strong> ist ein persönliches Scrum-Master-Tool für BILA-Verwaltung, Aufgaben, Feedback und Entwicklungsziele.<br>
-          Daten werden in deiner eigenen Google Drive gespeichert – privat und kostenlos.
+      <div class="sett-section" id="sett-about">
+        <div class="sett-hd" onclick="toggleSett('sett-about')">
+          <span class="sett-hd-icon">ℹ️</span>
+          <span class="sett-hd-title">Über Team Insight</span>
+          <span class="sett-hd-badge">v${APP_VERSION}</span>
+          <span class="sett-hd-chevron">▶</span>
         </div>
-        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">📋 Was ist neu in v${APP_VERSION}:</div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.9">
-            ✦ Globale Suche (Topbar + eigene Suchseite)<br>
-            ✦ Browser-Tab Favicon<br>
-            ✦ Dashboard-Widgets konfigurierbar<br>
-            ✦ BILA-Vorlagen mit Leitfragen<br>
-            ✦ Notification-Banner für überfällige Einträge<br>
-            ✦ BILA-Häufigkeit pro Mitglied<br>
-            ✦ Zeitachse / Timeline pro Mitglied<br>
-            ✦ Sprache DE/EN<br>
-            ✦ Gesprächsmappe PDF-Export pro Mitglied<br>
-            ✦ Follow-ups / Follow-up Tracker<br>
-            ✦ Einstellungen neu strukturiert + Toast-Notifications<br>
-            ✦ Datenschutz-Modus<br>
-            ✦ Zweistufige Lösch-Bestätigung<br>
-            ✦ Standard-Einstellungen für neue Mitglieder
+        <div class="sett-body" style="padding-top:14px">
+          <div style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:14px">
+            <strong style="color:var(--text)">Team Insight</strong> ist ein persönliches Scrum-Master-Tool für BILA-Verwaltung, Aufgaben, Feedback und Entwicklungsziele. Daten werden in deiner eigenen Google Drive gespeichert – privat und kostenlos.
           </div>
-        </div>
-        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">
-          Google Drive Sync · localStorage Fallback · Single-File App · Kein Server nötig
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px">📋 Was ist neu in v${APP_VERSION}:</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.9">
+            ✦ Einstellungen: aufklappbare Sektionen<br>
+            ✦ Module: Follow-ups + Suche hinzugefügt<br>
+            ✦ Dark Mode (folgt Betriebssystem)<br>
+            ✦ Metriken mit Icons und Akzentfarben<br>
+            ✦ Filter-Leisten eingeklappt (platzsparend)<br>
+            ✦ Kontextmenü für Task-Aktionen (Handy)<br>
+            ✦ Verbesserte Empty States<br>
+            ✦ Tab-Scroll-Indikator<br>
+            ✦ Dashboard Mobile-Priorisierung<br>
+            ✦ «Wiedervorlage» → «Follow-up» umbenannt
+          </div>
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">
+            Google Drive Sync · localStorage Fallback · Single-File App · Kein Server nötig
+          </div>
         </div>
       </div>
 
     </div>
   `;
+  // Auto-open backup if not signed in
+  if(!isSignedIn()) openSett('sett-backup');
 }
 
 
@@ -4337,6 +4364,17 @@ function showCtxMenu(e, items){
 function closeCtxMenu(){ _ctxMenu?.remove(); _ctxMenu=null; }
 
 // ── Filter panel toggle ──────────────────────────────────────
+
+function toggleSett(id){
+  const sec = document.getElementById(id);
+  if(!sec) return;
+  sec.classList.toggle('open');
+}
+function openSett(id){
+  const sec = document.getElementById(id);
+  if(sec) sec.classList.add('open');
+}
+
 function toggleFilterPanel(panelId, btnId){
   const panel = document.getElementById(panelId);
   const btn = document.getElementById(btnId);
