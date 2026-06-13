@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Team Insight v4.5</title>
+<title>Team Insight v4.6</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23185FA5'/%3E%3Ccircle cx='16' cy='11' r='4' fill='%23fff'/%3E%3Cpath d='M8 25c0-4.4 3.6-8 8-8s8 3.6 8 8' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -556,7 +556,7 @@ em.hl{background:#fef9c3;border-radius:2px;font-style:normal}
   </div>
   <div class="sb-item" onclick="showView('followups');closeSidebar()" id="nav-followups">
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-    Wiedervorlagen
+    Follow-ups
   </div>
   <div class="sb-item" onclick="showView('search');closeSidebar()" id="nav-search">
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
@@ -651,7 +651,7 @@ const BILA_TYPES = ['Reguläres BILA','Probezeitgespräch','Jahresgespräch','En
 const PRIOS = ['Hoch','Mittel','Niedrig'];
 const CONF_LEVELS = ['Standard','Persönlich','Vertraulich','HR-relevant'];
 
-const APP_VERSION = '4.5';
+const APP_VERSION = '4.6';
 
 const DRIVE_FILENAME = 'teaminsight-data.json';
 
@@ -2478,7 +2478,7 @@ function openBilaDetail(id) {
     <div style="display:flex;gap:8px;margin-top:20px;padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap">
       <button class="btn btn-primary btn-sm" onclick="editBila(${id})">Bearbeiten</button>
       <button class="btn btn-sm" onclick="openNewTaskModal(${b.memberId},${id})">+ Aufgabe</button>
-      <button class="btn btn-sm" onclick="openFollowupModal(${id},${b.memberId})" style="background:#fdf4ff;border-color:#e879f9;color:#7e22ce">🔁 Wiedervorlage</button>
+      <button class="btn btn-sm" onclick="openFollowupModal(${id},${b.memberId})" style="background:#fdf4ff;border-color:#e879f9;color:#7e22ce">🔁 Follow-up</button>
       <button class="btn btn-sm btn-danger" onclick="deleteBila(${id})" style="margin-left:auto">Löschen</button>
     </div>
   `;
@@ -3252,7 +3252,7 @@ function renderSettingsView() {
           <div class="metric"><div class="metric-label">Aufgaben erledigt</div><div class="metric-val good">${doneTasks}</div></div>
           <div class="metric"><div class="metric-label">Feedback</div><div class="metric-val">${totalFbs}</div></div>
           <div class="metric"><div class="metric-label">Entwicklungsziele</div><div class="metric-val">${totalGoals} <span style="font-size:12px;color:var(--success)">/ ${achievedGoals} ✓</span></div></div>
-          <div class="metric"><div class="metric-label">Wiedervorlagen</div><div class="metric-val ${openFu?'warn':''}">${openFu} offen</div></div>
+          <div class="metric"><div class="metric-label">Follow-ups</div><div class="metric-val ${openFu?'warn':''}">${openFu} offen</div></div>
           <div class="metric"><div class="metric-label">Datengrösse</div><div class="metric-val" style="font-size:14px">${dataSize} KB</div></div>
         </div>
         <div style="font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px">
@@ -3301,7 +3301,7 @@ function renderSettingsView() {
             ✦ Zeitachse / Timeline pro Mitglied<br>
             ✦ Sprache DE/EN<br>
             ✦ Gesprächsmappe PDF-Export pro Mitglied<br>
-            ✦ Wiedervorlagen / Follow-up Tracker<br>
+            ✦ Follow-ups / Follow-up Tracker<br>
             ✦ Einstellungen neu strukturiert + Toast-Notifications<br>
             ✦ Datenschutz-Modus<br>
             ✦ Zweistufige Lösch-Bestätigung<br>
@@ -3914,7 +3914,7 @@ const WIDGET_DEFS = [
   {id:'devgoals',icon:'🎯', label:'Entwicklungsziele'},
   {id:'risks',   icon:'⚠️', label:'Risiken & Trends'},
   {id:'team',    icon:'👥', label:'Team-Übersicht'},
-  {id:'followups',icon:'🔁',label:'Wiedervorlagen'},
+  {id:'followups',icon:'🔁',label:'Follow-ups'},
 ];
 function getWidgetOrder(){
   return state.settings.dashboardWidgets || WIDGET_DEFS.map(w=>w.id);
@@ -4010,7 +4010,7 @@ function renderNotifBanner(){
   });
   // Followups due
   const fuDue = (state.followups||[]).filter(fu=>!fu.done&&fu.dueDate&&fu.dueDate<=today());
-  if(fuDue.length) items.push({cls:'amber', icon:'🔁', text:`${fuDue.length} Wiedervorlage${fuDue.length!==1?'n':''}`, action:"showView('followups')"});
+  if(fuDue.length) items.push({cls:'amber', icon:'🔁', text:`${fuDue.length} Follow-up${fuDue.length!==1?'n':''}`, action:"showView('followups')"});
   if(!items.length) return;
   const banner = document.createElement('div');
   banner.id = 'notif-banner';
@@ -4075,7 +4075,7 @@ function renderTimeline(memberId){
   }));
   // Followups
   (state.followups||[]).filter(fu=>fu.memberId===memberId).forEach(fu=>events.push({
-    date:fu.dueDate||today(), type:'followup', icon:'🔁', title:fu.text||'Wiedervorlage',
+    date:fu.dueDate||today(), type:'followup', icon:'🔁', title:fu.text||'Follow-up',
     sub:fmtDate(fu.dueDate)+(fu.done?' · ✓ Erledigt':''),
     action:'showView(\'followups\')'
   }));
@@ -4099,7 +4099,7 @@ function renderTimeline(memberId){
 const I18N = {
   de: { dashboard:'Dashboard', tasks:'Aufgaben', bilas:'Gespräche', feedback:'Feedback',
         devgoals:'Entwicklungsziele', ai:'KI-Assistent', settings:'Einstellungen',
-        search:'Suche', followups:'Wiedervorlagen',
+        search:'Suche', followups:'Follow-ups',
         addConversation:'+ Gespräch', addTask:'+ Aufgabe', addGoal:'+ Ziel', addFeedback:'+ Feedback',
         open:'Offen', done:'Erledigt', members:'Mitglieder', overdue:'Überfällig' },
   en: { dashboard:'Dashboard', tasks:'Tasks', bilas:'Conversations', feedback:'Feedback',
@@ -4178,7 +4178,7 @@ function exportMemberPDF(memberId){
 }
 
 // ╔══════════════════════════════════════════════════════════════╗
-// ║  FEATURE 8 – Follow-up / Wiedervorlage Tracker               ║
+// ║  FEATURE 8 – Follow-up / Follow-up Tracker               ║
 // ╚══════════════════════════════════════════════════════════════╝
 function openFollowupModal(bilaId, memberId, editId){
   const fu = editId ? (state.followups||[]).find(f=>f.id===editId) : null;
@@ -4187,7 +4187,7 @@ function openFollowupModal(bilaId, memberId, editId){
   modal.id = 'ov-followup';
   const members = state.members;
   modal.innerHTML = `<div class="modal" style="max-width:480px">
-    <div class="modal-header"><span class="modal-title">${fu?'Wiedervorlage bearbeiten':'Neue Wiedervorlage'}</span><button class="modal-close" onclick="document.getElementById('ov-followup').remove()">&#215;</button></div>
+    <div class="modal-header"><span class="modal-title">${fu?'Follow-up bearbeiten':'Neue Follow-up'}</span><button class="modal-close" onclick="document.getElementById('ov-followup').remove()">&#215;</button></div>
     <div class="form-row"><label class="fl">Thema / Notiz *</label><textarea id="fu-text" rows="3" placeholder="Was soll erinnert werden?">${fu?fu.text||'':''}</textarea></div>
     <div class="form-grid2">
       <div class="form-row"><label class="fl">Fälligkeitsdatum</label><input type="date" id="fu-date" value="${fu?fu.dueDate:today()}"></div>
@@ -4217,11 +4217,11 @@ function saveFollowup(editId){
   renderNotifBanner();
   if(currentView==='followups') renderFollowupsView();
 }
-function deleteFollowup(id){ if(!confirm('Wiedervorlage löschen?'))return; state.followups=(state.followups||[]).filter(f=>f.id!==id); save(); document.getElementById('ov-followup')?.remove(); if(currentView==='followups')renderFollowupsView(); renderNotifBanner(); }
+function deleteFollowup(id){ if(!confirm('Follow-up löschen?'))return; state.followups=(state.followups||[]).filter(f=>f.id!==id); save(); document.getElementById('ov-followup')?.remove(); if(currentView==='followups')renderFollowupsView(); renderNotifBanner(); }
 function toggleFollowupDone(id){ const fu=(state.followups||[]).find(f=>f.id===id); if(fu){fu.done=!fu.done;save();renderFollowupsView();renderNotifBanner();} }
 
 function renderFollowupsView(){
-  document.getElementById('topbar-actions').innerHTML=`<span id="sync-status"></span><button class="btn btn-primary btn-sm" onclick="openFollowupModal()">+ Wiedervorlage</button>`;
+  document.getElementById('topbar-actions').innerHTML=`<span id="sync-status"></span><button class="btn btn-primary btn-sm" onclick="openFollowupModal()">+ Follow-up</button>`;
   const fus = state.followups||[];
   const open = fus.filter(f=>!f.done).sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||''));
   const done = fus.filter(f=>f.done);
@@ -4234,8 +4234,8 @@ function renderFollowupsView(){
       <div class="metric"><div class="metric-label">Erledigt</div><div class="metric-val good">${done.length}</div></div>
     </div>
     <div class="card" style="margin-bottom:14px">
-      <div class="card-title">Offene Wiedervorlagen (${open.length})</div>
-      ${open.length===0?'<div style="color:var(--muted);font-size:13px">Keine offenen Wiedervorlagen 🎉</div>':
+      <div class="card-title">Offene Follow-ups (${open.length})</div>
+      ${open.length===0?'<div style="color:var(--muted);font-size:13px">Keine offenen Follow-ups 🎉</div>':
       open.map(fu=>{
         const m = getMember(fu.memberId);
         const isLate = fu.dueDate && fu.dueDate < today_;
