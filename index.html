@@ -3917,7 +3917,7 @@ const WIDGET_DEFS = [
   {id:'followups',icon:'🔁',label:'Follow-ups'},
 ];
 function getWidgetOrder(){
-  return state.settings.dashboardWidgets || WIDGET_DEFS.map(w=>w.id);
+  return (state.settings && state.settings.dashboardWidgets) || WIDGET_DEFS.map(w=>w.id);
 }
 function openWidgetConfig(){
   const order = getWidgetOrder();
@@ -4355,8 +4355,19 @@ function countActiveFilters(ids){
 load();
 if (!state.teams) state.teams = [];
 if (!state.feedbacks) state.feedbacks = [];
-if (!state.modules) state.modules = {tasks:true, bilas:true, feedback:true};
+if (!state.followups) state.followups = [];
+if (!state.modules) state.modules = {tasks:true, bilas:true, feedback:true, devgoals:true, ai:true};
 if (!state.backup) state.backup = {localEnabled: false, filename: 'TeamInsight-Backup'};
+
+// Always ensure settings and all sub-fields exist (guards against old localStorage data)
+if (!state.settings) state.settings = {};
+if (!state.settings.clientId) state.settings.clientId = '498089633917-rgqiqfol4p86dl588q0h3ck8gdii29iu.apps.googleusercontent.com';
+if (!state.settings.lang) state.settings.lang = 'de';
+if (!state.settings.dashboardWidgets) state.settings.dashboardWidgets = WIDGET_DEFS.map(w=>w.id);
+if (!state.settings.backupFilename) state.settings.backupFilename = 'TeamInsight-Backup';
+if (state.settings.defaultPrio === undefined) state.settings.defaultPrio = 'Mittel';
+if (state.settings.defaultBilaFreq === undefined) state.settings.defaultBilaFreq = 4;
+if (state.settings.localAutoBackup === undefined) state.settings.localAutoBackup = false;
 
 // Fix nextId counters — always higher than any existing ID (guards against migration bugs)
 const maxMId = state.members.reduce((mx,m)=>Math.max(mx,m.id||0),0);
